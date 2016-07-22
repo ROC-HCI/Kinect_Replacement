@@ -86,5 +86,6 @@ def transform(args, dataset):
     img, jts = image_transform(args, datum)
     images.append(img)
     joints.append(jts)
+    print('test')
 
   return images, joints
