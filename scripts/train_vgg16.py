@@ -16,6 +16,7 @@ import six
 import sys
 import time
 import argparse
+import math
 
 def load_dataset(args):
   train_fn = '%s/train_joints.csv' % args.datadir
@@ -67,6 +68,28 @@ def get_model_optimizer(args):
     print('No optimizer generated.')
     return model
 
+def shuffle_input_output(args, train_images, train_joints):
+  zip_list = list(zip(train_images, train_joints))
+  random.shuffle(zip_list)
+  train_images = []
+  train_joints = []
+  train_images[:], train_joints[:] = zip(*zip_list)
+  nb_batch = math.ceil(len(train_images) / args.batchsize)
+
+  return np.asarray(train_images), np.asarray(train_joints), nb_batch
+
+def training(args, model, train_images, train_joints):
+  for epoch in range(args.epoch_offset + 1, args.epoch + 1):
+    train_images, train_joints, nb_batch = shuffle_input_output(args, train_images, train_joints)
+    logging.info('Training epoch{}...'.format(epoch))
+    for batch in range(nb_batch):
+      images_batch = train_images[batch*args.batchsize:(batch+1)*args.batchsize]
+      joints_batch = train_joints[batch*args.batchsize:(batch+1)*args.batchsize]
+      loss = model.train_on_batch(images_batch, joints_batch)
+
+      logging.info('batch{}, loss:{}'.format(batch+1, loss))
+    
+
 if __name__ == '__main__':
   sys.path.append('../../scripts')  # to resume from result dir
   sys.path.append('../../models')  # to resume from result dir
@@ -110,7 +133,7 @@ if __name__ == '__main__':
 
   #training
   train_images, train_joints = transform(args, train_dl)
-  model.fit(train_images, train_joints, nb_epoch=args.nb_epoch, batch_size=args.batch_size)
+  training(args, model, train_images, train_joints)
   logging.info('Training is done. Testing starts...')
 
   #testing
