@@ -127,7 +127,7 @@ if __name__ == '__main__':
   logging.info('# of test data:{}'.format(N_test))
 
   #compile the model
-  logging.info('Compiling the model... Joints number: {}'.format(args.joints_num))
+  logging.info('Compiling the model... Joints number: {}'.format(args.joint_num))
   model.compile(optimizer=opt,
                 loss='categorical_crossentropy',
                 metrics=['accuracy'])
