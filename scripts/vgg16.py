@@ -3,8 +3,8 @@ from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.optimizers import SGD
 
-def vgg_16():
-  model = Sequential(joints_num)
+def vgg_16(joints_num):
+  model = Sequential()
   model.add(ZeroPadding2D((1,1), input_shape=(3,224,224)))
   model.add(Convolution2D(64,3,3, activation='relu'))
   model.add(ZeroPadding2D((1,1)))
