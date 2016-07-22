@@ -127,12 +127,16 @@ if __name__ == '__main__':
   logging.info('# of test data:{}'.format(N_test))
 
   #compile the model
+  logging.info('Compiling the model... Joints number: {}'.format(args.joints_num))
   model.compile(optimizer=opt,
                 loss='categorical_crossentropy',
                 metrics=['accuracy'])
 
   #training
+  logging.info('Preprocessing images and joints...')
   train_images, train_joints = transform(args, train_dl)
+
+  logging.info('Start training...')
   training(args, model, train_images, train_joints)
   logging.info('Training is done. Testing starts...')
 
