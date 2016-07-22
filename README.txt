@@ -1,0 +1,19 @@
+python scripts/train_vgg16.py \
+--epoch 2 \
+--batchsize 128 \
+--lr 0.05 \
+--snapshot 10 \
+--datadir data/FLIC-full \
+--channel 3 \
+--test_freq 10 \
+--flip 1 \
+--size 224 \
+--min_dim 100 \
+--cropping 1 \
+--crop_pad_inf 1.4 \
+--crop_pad_sup 1.6 \
+--shift 5 \
+--gcn 1 \
+--joint_num 7 \
+--symmetric_joints "[[2, 4], [1, 5], [0, 6]]" \
+--opt Adam
