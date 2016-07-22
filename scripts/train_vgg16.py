@@ -43,7 +43,7 @@ def create_result_dir(args):
   args.result_dir = result_dir
 
 def get_model_optimizer(args):
-  model = vgg_16()
+  model = vgg_16(args.joint_num)
 
   if 'opt' in args:
     # prepare optimizer
