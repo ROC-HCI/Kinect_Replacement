@@ -76,7 +76,7 @@ def training(args, model, train_images):
 
     #devide training set into batches
     logging.info('Training epoch{}...'.format(epoch))
-    nb_batch = math.ceil(len(train_images)/args.batchsize)
+    nb_batch = int(math.ceil(len(train_images)/args.batchsize))
     for batch in range(nb_batch):
       train_batch = train_images[batch*args.batchsize:(batch+1)*args.batchsize]
       images_batch, joints_batch = transform(args, train_batch)
