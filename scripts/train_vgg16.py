@@ -80,6 +80,8 @@ def training(args, model, train_images):
     for batch in range(nb_batch):
       train_batch = train_images[batch*args.batchsize:(batch+1)*args.batchsize]
       images_batch, joints_batch = transform(args, train_batch)
+      images_batch = images_batch.tolist()
+      joints_batch = images_batch.tolist()
       loss = model.train_on_batch(images_batch, joints_batch)
       logging.info('batch{}, loss:{}'.format(batch+1, loss))
     
