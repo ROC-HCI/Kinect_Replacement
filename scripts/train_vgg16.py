@@ -69,7 +69,7 @@ def get_model_optimizer(args):
     return model
 
 def training(args, model, train_images):
-  for epoch in range(args.epoch_offset + 1, args.epoch + 1):
+  for epoch in range(1, args.epoch + 1):
     #shuffle the training set before generating batches
     logging.info('Shuffling training set...')
     train_images = np.random.permutation(train_images)
