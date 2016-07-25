@@ -1,3 +1,4 @@
+#!/bin/bash
 module load anaconda
 module load opencv
 module unload python
