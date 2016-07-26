@@ -2,7 +2,8 @@ from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras import optimizers
-from vgg16 import vgg_16
+from sklearn.utils import shuffle
+from vgg16 import vgg_16, vgg_16_conv, vgg_16_fc
 from transformation import transform
 
 import ctypes
@@ -17,6 +18,7 @@ import sys
 import time
 import argparse
 import math
+import h5py
 
 def load_dataset(args):
   train_fn = '%s/train_joints.csv' % args.datadir
@@ -68,23 +70,74 @@ def get_model_optimizer(args):
     print('No optimizer generated.')
     return model
 
-def training(args, model, train_images):
+def training(args, model, train_dl):
   for epoch in range(1, args.epoch + 1):
     #shuffle the training set before generating batches
     logging.info('Shuffling training set...')
-    train_images = np.random.permutation(train_images)
+    train_dl = np.random.permutation(train_dl)
 
     #devide training set into batches
     logging.info('Training epoch{}...'.format(epoch))
-    nb_batch = int(math.ceil(len(train_images)/args.batchsize))
+    nb_batch = int(math.ceil(len(train_dl)/args.batchsize))
     for batch in range(nb_batch):
-      train_batch = train_images[batch*args.batchsize:(batch+1)*args.batchsize]
+      train_batch = train_dl[batch*args.batchsize:(batch+1)*args.batchsize]
       images_batch, joints_batch = transform(args, train_batch)
       images_batch = list(images_batch)
       joints_batch = list(images_batch)
       loss = model.train_on_batch(images_batch, joints_batch)
       logging.info('batch{}, loss:{}'.format(batch+1, loss))
     
+def save_bottleneck_features(args, train_dl):
+  f = h5py.File(args.weights_path)
+  conv_model = vgg_16_conv()
+
+  for k in range(f.attrs['nb_layers']):
+    if k >= len(conv_model.layers):
+      break
+    g = f['layer_{}'.format(k)]
+    weights = [g['param_{}'.format(p)] for p in range(g.attrs['nb_params'])]
+    conv_model.layers[k].set_weights(weights)
+  f.close()
+  logging.info('Model loaded.')
+
+  nb_batch = int(math.ceil(len(train_dl)/args.batchsize))
+  all_bottleneck_features = 0
+  all_joints_info = 0
+  for batch in range(nb_batch):
+    train_batch = train_dl[batch*args.batchsize:(batch+1)*args.batchsize]
+    images_batch, joints_batch = transform(args, train_batch)
+    batch_bottleneck_features = model.predict_on_batch(images_batch)
+    if batch == 0:
+      all_bottleneck_features = batch_bottleneck_features
+      all_joints_info = joints_batch
+    np.append(all_bottleneck_features, batch_bottleneck_features)
+    np.append(all_joints_info, joints_batch)
+
+  np.save(open('all_bottleneck_features.npy', 'w'), all_bottleneck_features)
+  np.save(open('all_joints_info.npy', 'w'), all_joints_info)
+
+def train_fc_layers(args):
+  train_data = np.load(open('all_bottleneck_features.npy'))
+  train_joints = np.load(open('all_joints_info.npy'))
+
+  fc_model = vgg_16_fc(input_shape, args.joints_num)
+  fc_model.compile(optimizer='Adagrad', loss='categorical_crossentropy', metrics=['accuracy'])
+
+  for epoch in range(1, args.epoch + 1):
+    #shuffle the training set before generating batches
+    logging.info('Shuffling training set...')
+    train_data, train_joints = shuffle(train_data, train_joints)
+
+    #devide training set into batches
+    logging.info('Training epoch{}...'.format(epoch))
+    nb_batch = int(math.ceil(len(train_data)/args.batchsize))
+    for batch in range(nb_batch):
+      data_batch = train_data[batch*args.batchsize:(batch+1)*args.batchsize]
+      joints_batch = train_joints[batch*args.batchsize:(batch+1)*args.batchsize]
+      
+      loss = fc_model.train_on_batch(data_batch, joints_batch)
+      logging.info('batch{}, loss:{}'.format(batch+1, loss))
+
 if __name__ == '__main__':
   sys.path.append('../../scripts')  # to resume from result dir
   sys.path.append('../../models')  # to resume from result dir
@@ -109,6 +162,7 @@ if __name__ == '__main__':
   parser.add_argument('--joint_num', type=int)
   parser.add_argument('--symmetric_joints')
   parser.add_argument('--opt')
+  parser.add_argument('--weights_path')
   args = parser.parse_args()
 
   # create result dir
@@ -121,18 +175,28 @@ if __name__ == '__main__':
   logging.info('# of training data:{}'.format(N))
   logging.info('# of test data:{}'.format(N_test))
 
-  #compile the model
+  # compile the model
   logging.info('Compiling the model... Joints number: {}'.format(args.joint_num))
   model.compile(optimizer=opt,
                 loss='categorical_crossentropy',
                 metrics=['accuracy'])
 
-  #training
-  logging.info('Start training...')
-  training(args, model, train_dl)
-  logging.info('Training is done. Testing starts...')
+  if args.weights_path:
+    # get prediction from conv layers
+    logging.info('Saving bottleneck features...')
+    save_bottleneck_features(args, train_dl)
 
-  #testing
+    # train the dense layers
+    logging.info('Training dense layers...')
+    train_fc_layers(args)
+
+  else:
+    # training
+    logging.info('Start training...')
+    training(args, model, train_dl)
+    logging.info('Training is done. Testing starts...')
+
+  # testing
   test_images, test_joints = transform(args, test_dl)
   model.test_on_batch(test_images, test_joints)
   
