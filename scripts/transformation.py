@@ -7,7 +7,7 @@ def image_resize(image, joints, new_size):
   orig_h, orig_w = image.shape[:2]
   joints[0::2] = joints[0::2] / float(orig_w) * new_size
   joints[1::2] = joints[1::2] / float(orig_h) * new_size
-  image = cv.resize(image, (new_size, new_size), interpolation=cv.INTER_NEAREST)
+  image = cv.resize(image, (new_size, new_size), interpolation=cv.INTER_NEAREST).astype(np.float32)
 
   return image, joints
 
