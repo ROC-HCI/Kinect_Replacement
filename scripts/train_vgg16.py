@@ -108,7 +108,7 @@ def save_bottleneck_features(args, train_dl):
   for batch in range(nb_batch):
     train_batch = train_dl[batch*args.batchsize:(batch+1)*args.batchsize]
     images_batch, joints_batch = transform(args, train_batch)
-    batch_bottleneck_features = model.predict_on_batch(images_batch)
+    batch_bottleneck_features = conv_model.predict_on_batch(images_batch)
     if batch == 0:
       all_bottleneck_features = batch_bottleneck_features
       all_joints_info = joints_batch
