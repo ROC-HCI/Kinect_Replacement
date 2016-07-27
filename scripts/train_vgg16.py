@@ -115,6 +115,7 @@ def save_bottleneck_features(args, train_dl):
     np.append(all_bottleneck_features, batch_bottleneck_features)
     np.append(all_joints_info, joints_batch)
 
+  logging.info('Saving bottleneck features...')
   np.save(open('all_bottleneck_features.npy', 'w'), all_bottleneck_features)
   np.save(open('all_joints_info.npy', 'w'), all_joints_info)
 
@@ -176,7 +177,6 @@ if __name__ == '__main__':
   # load pre-trained model and train part of the model
   if args.weights_path:
     # get prediction from conv layers
-    logging.info('Saving bottleneck features...')
     save_bottleneck_features(args, train_dl)
 
     # train the dense layers
