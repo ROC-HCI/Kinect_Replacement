@@ -62,12 +62,13 @@ def image_transform(args, datum):
   if args.size > 0:
     image, joints = image_resize(image, joints, args.size)
 
+  h, w, c = image.shape
   #further transformation to fit the model
   image = image.transpose((2,0,1))
   image = np.expand_dims(image, axis=0)
 
   # joint pos centerization
-  h, w, c = image.shape
+  # h, w, c = image.shape
   center_pt = np.array([w / 2, h / 2], dtype=np.float32)  # x,y order
   joints = list(zip(joints[0::2], joints[1::2]))
 
