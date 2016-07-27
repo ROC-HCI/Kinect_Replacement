@@ -170,6 +170,9 @@ if __name__ == '__main__':
   # create result dir
   create_result_dir(args)
 
+  # load datasets
+  train_dl, test_dl = load_dataset(args)
+
   # load pre-trained model and train part of the model
   if args.weights_path:
     # get prediction from conv layers
@@ -184,7 +187,6 @@ if __name__ == '__main__':
   else:
     # create model and optimizer
     model, opt = get_model_optimizer(args)
-    train_dl, test_dl = load_dataset(args)
     N, N_test = len(train_dl), len(test_dl)
     logging.info('# of training data:{}'.format(N))
     logging.info('# of test data:{}'.format(N_test))
