@@ -16,4 +16,5 @@ python scripts/train_vgg16.py \
 --gcn 1 \
 --joint_num 7 \
 --symmetric_joints "[[2, 4], [1, 5], [0, 6]]" \
---opt Adam
+--opt Adam \
+--weights_path "vgg16_weights.h5"

@@ -170,35 +170,37 @@ if __name__ == '__main__':
   # create result dir
   create_result_dir(args)
 
-  # create model and optimizer
-  model, opt = get_model_optimizer(args)
-  train_dl, test_dl = load_dataset(args)
-  N, N_test = len(train_dl), len(test_dl)
-  logging.info('# of training data:{}'.format(N))
-  logging.info('# of test data:{}'.format(N_test))
+  # load pre-trained model and train part of the model
+  if args.weights_path:
+    # get prediction from conv layers
+    logging.info('Saving bottleneck features...')
+    save_bottleneck_features(args, train_dl)
 
-  # compile the model
-  logging.info('Compiling the model... Joints number: {}'.format(args.joint_num))
-  model.compile(optimizer=opt,
-                loss='categorical_crossentropy',
-                metrics=['accuracy'])
+    # train the dense layers
+    logging.info('Training dense layers...')
+    train_fc_layers(args)
 
-  # if args.weights_path:
-  #   # get prediction from conv layers
-  #   logging.info('Saving bottleneck features...')
-  #   save_bottleneck_features(args, train_dl)
+  # otherwise train the entire model
+  else:
+    # create model and optimizer
+    model, opt = get_model_optimizer(args)
+    train_dl, test_dl = load_dataset(args)
+    N, N_test = len(train_dl), len(test_dl)
+    logging.info('# of training data:{}'.format(N))
+    logging.info('# of test data:{}'.format(N_test))
 
-  #   # train the dense layers
-  #   logging.info('Training dense layers...')
-  #   train_fc_layers(args)
+    # compile the model
+    logging.info('Compiling the model... Joints number: {}'.format(args.joint_num))
+    model.compile(optimizer=opt,
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    logging.info('Start training...')
 
-  # else:
     # training
-  logging.info('Start training...')
-  training(args, model, train_dl)
-  logging.info('Training is done. Testing starts...')
+    training(args, model, train_dl)
+    logging.info('Training is done. Testing starts...')
 
   # testing
-  test_images, test_joints = transform(args, test_dl)
-  model.test_on_batch(test_images, test_joints)
+  # test_images, test_joints = transform(args, test_dl)
+  # model.test_on_batch(test_images, test_joints)
   
