@@ -181,20 +181,20 @@ if __name__ == '__main__':
                 loss='categorical_crossentropy',
                 metrics=['accuracy'])
 
-  if args.weights_path:
-    # get prediction from conv layers
-    logging.info('Saving bottleneck features...')
-    save_bottleneck_features(args, train_dl)
+  # if args.weights_path:
+  #   # get prediction from conv layers
+  #   logging.info('Saving bottleneck features...')
+  #   save_bottleneck_features(args, train_dl)
 
-    # train the dense layers
-    logging.info('Training dense layers...')
-    train_fc_layers(args)
+  #   # train the dense layers
+  #   logging.info('Training dense layers...')
+  #   train_fc_layers(args)
 
-  else:
+  # else:
     # training
-    logging.info('Start training...')
-    training(args, model, train_dl)
-    logging.info('Training is done. Testing starts...')
+  logging.info('Start training...')
+  training(args, model, train_dl)
+  logging.info('Training is done. Testing starts...')
 
   # testing
   test_images, test_joints = transform(args, test_dl)
