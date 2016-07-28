@@ -102,9 +102,7 @@ def save_bottleneck_features(args, train_dl):
   f.close()
   logging.info('Model loaded.')
   print('Model loaded')
-  conv_model.summary()
-  import pdb;pdb.set_trace()
-  
+
   nb_batch = int(math.ceil(len(train_dl)/args.batchsize))
   all_bottleneck_features = 0
   all_joints_info = 0
@@ -149,6 +147,25 @@ def train_fc_layers(args):
       loss = fc_model.train_on_batch(data_batch, joints_batch)
       logging.info('batch{}, loss:{}'.format(batch+1, loss))
 
+def load_pretrain_weights(args, model):
+  f = h5py.File(args.weights_path)
+
+  for k in range(f.attrs['nb_layers']):
+    if k >= len(model.layers):
+      break
+    g = f['layer_{}'.format(k)]
+    weights = [g['param_{}'.format(p)] for p in range(g.attrs['nb_params'])]
+    model.layers[k].set_weights(weights)
+  f.close()
+  logging.info('Model loaded.')
+  print('Model loaded')
+
+  # set the first 25 la
+  for layer in model.layers[0:25]:
+    layer.trainable = False
+
+  return model
+
 if __name__ == '__main__':
   sys.path.append('../../scripts')  # to resume from result dir
   sys.path.append('../../models')  # to resume from result dir
@@ -185,12 +202,20 @@ if __name__ == '__main__':
   # load pre-trained model and train part of the model
   if args.weights_path:
     # get prediction from conv layers
-    save_bottleneck_features(args, train_dl)
+    # save_bottleneck_features(args, train_dl)
 
     # train the dense layers
-    logging.info('Training dense layers...')
-    train_fc_layers(args)
+    # logging.info('Training dense layers...')
+    # train_fc_layers(args)
 
+    model, opt = get_model_optimizer(args)
+    model = load_pretrain_weights(args, model)
+
+    model.compile(optimizer=opt,
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+
+    training(args, model, train_dl)
   # otherwise train the entire model
   else:
     # create model and optimizer
