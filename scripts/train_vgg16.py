@@ -160,7 +160,7 @@ def load_pretrain_weights(args, model):
   logging.info('Model loaded.')
   print('Model loaded')
 
-  # set the first 25 la
+  # set the first 25 layers to untrainable
   for layer in model.layers[0:25]:
     layer.trainable = False
 
