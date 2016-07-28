@@ -123,6 +123,7 @@ def train_fc_layers(args):
   train_data = np.load(open('all_bottleneck_features.npy'))
   train_joints = np.load(open('all_joints_info.npy'))
 
+  input_shape = train_data.shape
   fc_model = vgg_16_fc(input_shape, args.joints_num)
   fc_model.compile(optimizer='Adagrad', loss='categorical_crossentropy', metrics=['accuracy'])
 
