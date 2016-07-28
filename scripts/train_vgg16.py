@@ -102,7 +102,9 @@ def save_bottleneck_features(args, train_dl):
   f.close()
   logging.info('Model loaded.')
   print('Model loaded')
-
+  conv_model.summary()
+  import pdb;pdb.set_trace()
+  
   nb_batch = int(math.ceil(len(train_dl)/args.batchsize))
   all_bottleneck_features = 0
   all_joints_info = 0
