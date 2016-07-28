@@ -101,6 +101,7 @@ def save_bottleneck_features(args, train_dl):
     conv_model.layers[k].set_weights(weights)
   f.close()
   logging.info('Model loaded.')
+  print('Model loaded')
 
   nb_batch = int(math.ceil(len(train_dl)/args.batchsize))
   all_bottleneck_features = 0
@@ -108,6 +109,7 @@ def save_bottleneck_features(args, train_dl):
   for batch in range(nb_batch):
     train_batch = train_dl[batch*args.batchsize:(batch+1)*args.batchsize]
     images_batch, joints_batch = transform(args, train_batch)
+    print('Images batches and joints batches generated. Begin predicting...')
     batch_bottleneck_features = conv_model.predict_on_batch(images_batch)
     if batch == 0:
       all_bottleneck_features = batch_bottleneck_features
@@ -115,6 +117,7 @@ def save_bottleneck_features(args, train_dl):
     np.append(all_bottleneck_features, batch_bottleneck_features)
     np.append(all_joints_info, joints_batch)
 
+  print('Saving bottleneck features...')
   logging.info('Saving bottleneck features...')
   np.save(open('all_bottleneck_features.npy', 'w'), all_bottleneck_features)
   np.save(open('all_joints_info.npy', 'w'), all_joints_info)
