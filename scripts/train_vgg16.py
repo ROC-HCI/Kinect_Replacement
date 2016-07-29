@@ -202,7 +202,8 @@ if __name__ == '__main__':
   # load pre-trained model and train part of the model
   if args.weights_path:
     # get prediction from conv layers
-    save_bottleneck_features(args, train_dl)
+    small_sample = train_dl[:1000]
+    save_bottleneck_features(args, small_sample)
 
     # train the dense layers
     logging.info('Training dense layers...')
@@ -227,7 +228,7 @@ if __name__ == '__main__':
     # compile the model
     logging.info('Compiling the model... Joints number: {}'.format(args.joint_num))
     model.compile(optimizer=opt,
-                  loss='categorical_crossentropy',
+                  loss='mean_squared_error',
                   metrics=['accuracy'])
     logging.info('Start training...')
 
