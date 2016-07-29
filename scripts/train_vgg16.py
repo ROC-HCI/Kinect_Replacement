@@ -127,8 +127,8 @@ def save_bottleneck_features(args, train_dl):
     if nb_dl == 0:
       all_bottleneck_features = batch_bottleneck_features
       all_joints_info = joint
-    np.append(all_bottleneck_features, batch_bottleneck_features)
-    np.append(all_joints_info, joint)
+    np.concatenate((all_bottleneck_features, batch_bottleneck_features), axis=0)
+    np.concatenate((all_joints_info, joint), axis=0)
 
   print('Saving bottleneck features...')
   logging.info('Saving bottleneck features...')
