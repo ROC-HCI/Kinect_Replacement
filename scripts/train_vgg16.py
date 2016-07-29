@@ -219,7 +219,7 @@ if __name__ == '__main__':
     images_batch, joints_batch = transform(args, small_sample)
     print('images_batch shape:{}'.format(images_batch.shape))
     print('joints_batch shape:{}'.format(joints_batch.shape))
-    model.fit(images_batch, joints_batch, batch_size=50, nb_epoch=2)
+    model.fit(images_batch, joints_batch, batch_size=args.batchsize, nb_epoch=args.epoch)
   # training(args, model, train_dl)
   # otherwise train the entire model
   else:
