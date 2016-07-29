@@ -4,7 +4,7 @@ from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2
 from keras import optimizers
 from sklearn.utils import shuffle
 from vgg16 import vgg_16, vgg_16_conv, vgg_16_fc
-from transformation import transform
+from transformation import transform, image_transform
 
 import ctypes
 import imp
@@ -121,8 +121,7 @@ def save_bottleneck_features(args, train_dl):
   #   np.append(all_joints_info, joints_batch)
 
   for nb_dl, dl in enumerate(train_dl):
-    import pdb;pdb.set_trace()
-    image, joint = transform(args, dl)
+    image, joint = image_transform(args, dl.split(','))
     batch_bottleneck_features = conv_model.predict(image)
     if nb_dl == 0:
       all_bottleneck_features = batch_bottleneck_features
