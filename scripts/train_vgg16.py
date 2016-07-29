@@ -124,7 +124,6 @@ def save_bottleneck_features(args, train_dl):
     image, joint = image_transform(args, dl.split(','))
     image = np.expand_dims(image, axis=0)
     bottleneck_features = conv_model.predict(image)
-    import pdb;pdb.set_trace()
     if nb_dl == 0:
       all_bottleneck_features = bottleneck_features
       all_joints_info = joint
@@ -142,7 +141,6 @@ def train_fc_layers(args):
   train_joints = np.load(open('all_joints_info.npy'))
 
   input_shape = train_data.shape[1:]
-  import pdb;pdb.set_trace()
   fc_model = vgg_16_fc(input_shape, args.joints_num)
   fc_model.compile(optimizer='Adam', loss='mean_squared_error', metrics=['accuracy'])
 
