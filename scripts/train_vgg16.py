@@ -113,6 +113,7 @@ def save_bottleneck_features(args, train_dl):
     print('Images batch shape:{}'.format(images_batch.shape))
     print('Joints batch shape:{}'.format(joints_batch.shape))
     batch_bottleneck_features = conv_model.predict_on_batch(images_batch)
+    import pdb;pdb.set_trace()
     if batch == 0:
       all_bottleneck_features = batch_bottleneck_features
       all_joints_info = joints_batch
