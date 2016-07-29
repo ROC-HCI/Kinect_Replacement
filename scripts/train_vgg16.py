@@ -130,7 +130,7 @@ def train_fc_layers(args):
 
   input_shape = train_data.shape[1:]
   fc_model = vgg_16_fc(input_shape, args.joints_num)
-  fc_model.compile(optimizer='Adagrad', loss='categorical_crossentropy', metrics=['accuracy'])
+  fc_model.compile(optimizer='Adam', loss='mean_squared_error', metrics=['accuracy'])
 
   for epoch in range(1, args.epoch + 1):
     #shuffle the training set before generating batches
@@ -202,25 +202,20 @@ if __name__ == '__main__':
   # load pre-trained model and train part of the model
   if args.weights_path:
     # get prediction from conv layers
-    # save_bottleneck_features(args, train_dl)
+    save_bottleneck_features(args, train_dl)
 
     # train the dense layers
-    # logging.info('Training dense layers...')
-    # train_fc_layers(args)
+    logging.info('Training dense layers...')
+    train_fc_layers(args)
 
-    model, opt = get_model_optimizer(args)
-    model = load_pretrain_weights(args, model)
+    # model, opt = get_model_optimizer(args)
+    # model = load_pretrain_weights(args, model)
 
-    model.compile(optimizer=opt,
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer=opt,
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
 
-    # small_sample = train_dl[:200]
-    # images_batch, joints_batch = transform(args, small_sample)
-    # print('images_batch shape:{}'.format(images_batch.shape))
-    # print('joints_batch shape:{}'.format(joints_batch.shape))
-    # model.fit(images_batch, joints_batch, batch_size=args.batchsize, nb_epoch=args.epoch)
-    training(args, model, train_dl)
+    # training(args, model, train_dl)
   # otherwise train the entire model
   else:
     # create model and optimizer
