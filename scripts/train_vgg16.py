@@ -122,6 +122,7 @@ def save_bottleneck_features(args, train_dl):
 
   for nb_dl, dl in enumerate(train_dl):
     image, joint = image_transform(args, dl.split(','))
+    image = np.expand_dims(image, axis=0)
     batch_bottleneck_features = conv_model.predict(image)
     if nb_dl == 0:
       all_bottleneck_features = batch_bottleneck_features
