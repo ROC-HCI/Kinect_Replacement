@@ -106,19 +106,28 @@ def save_bottleneck_features(args, train_dl):
   nb_batch = int(math.ceil(len(train_dl)/args.batchsize))
   all_bottleneck_features = 0
   all_joints_info = 0
-  for batch in range(nb_batch):
-    train_batch = train_dl[batch*args.batchsize:(batch+1)*args.batchsize]
-    images_batch, joints_batch = transform(args, train_batch)
-    print('Images batches and joints batches generated. Begin predicting...')
-    print('Images batch shape:{}'.format(images_batch.shape))
-    print('Joints batch shape:{}'.format(joints_batch.shape))
-    batch_bottleneck_features = conv_model.predict_on_batch(images_batch)
-    import pdb;pdb.set_trace()
-    if batch == 0:
+  # for batch in range(nb_batch):
+  #   train_batch = train_dl[batch*args.batchsize:(batch+1)*args.batchsize]
+  #   images_batch, joints_batch = transform(args, train_batch)
+  #   print('Images batches and joints batches generated. Begin predicting...')
+  #   print('Images batch shape:{}'.format(images_batch.shape))
+  #   print('Joints batch shape:{}'.format(joints_batch.shape))
+  #   batch_bottleneck_features = conv_model.predict_on_batch(images_batch)
+  #   import pdb;pdb.set_trace()
+  #   if batch == 0:
+  #     all_bottleneck_features = batch_bottleneck_features
+  #     all_joints_info = joints_batch
+  #   np.append(all_bottleneck_features, batch_bottleneck_features)
+  #   np.append(all_joints_info, joints_batch)
+
+  for nb_dl, dl in enumerate(train_dl):
+    image, joint = transform(args, dl)
+    batch_bottleneck_features = conv_model.predict(image)
+    if nb_dl == 0:
       all_bottleneck_features = batch_bottleneck_features
-      all_joints_info = joints_batch
+      all_joints_info = joint
     np.append(all_bottleneck_features, batch_bottleneck_features)
-    np.append(all_joints_info, joints_batch)
+    np.append(all_joints_info, joint)
 
   print('Saving bottleneck features...')
   logging.info('Saving bottleneck features...')
