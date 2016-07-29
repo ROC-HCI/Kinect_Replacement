@@ -124,6 +124,7 @@ def save_bottleneck_features(args, train_dl):
     image, joint = image_transform(args, dl.split(','))
     image = np.expand_dims(image, axis=0)
     batch_bottleneck_features = conv_model.predict(image)
+    import pdb;pdb.set_trace()
     if nb_dl == 0:
       all_bottleneck_features = batch_bottleneck_features
       all_joints_info = joint
