@@ -187,7 +187,7 @@ if __name__ == '__main__':
   parser.add_argument('--crop_pad_sup', type=float)
   parser.add_argument('--shift', type=int)
   parser.add_argument('--gcn', type=int)
-  parser.add_argument('--joint_num', type=int)
+  parser.add_argument('--joints_num', type=int)
   parser.add_argument('--symmetric_joints')
   parser.add_argument('--opt')
   parser.add_argument('--weights_path')
