@@ -205,7 +205,7 @@ if __name__ == '__main__':
   if args.weights_path:
     # get prediction from conv layers
     small_sample = train_dl[:1000]
-    # save_bottleneck_features(args, small_sample)
+    save_bottleneck_features(args, small_sample)
 
     # train the dense layers
     logging.info('Training dense layers...')
