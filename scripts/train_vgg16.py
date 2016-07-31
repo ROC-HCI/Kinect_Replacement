@@ -2,6 +2,7 @@ from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras import optimizers
+from keras.callbacks import Callback
 from sklearn.utils import shuffle
 from vgg16 import vgg_16, vgg_16_conv, vgg_16_fc
 from transformation import transform, image_transform
@@ -19,6 +20,13 @@ import time
 import argparse
 import math
 import h5py
+
+class loss_acc_history(Callback):
+  def on_train_begin(self, logs={}):
+    self.loss_acc = []
+
+  def on_batch_end(self, batch, logs={}):
+    self.loss_acc.append((logs.get('loss'), logs.get('accuracy')))
 
 def load_dataset(args):
   train_fn = '%s/train_joints.csv' % args.datadir
@@ -125,6 +133,8 @@ def save_bottleneck_features(args, train_dl):
     image = np.expand_dims(image, axis=0)
     joint = np.expand_dims(joint, axis=0)
     bottleneck_features = conv_model.predict(image)
+    if (nb_dl+1) % 1000 == 0:
+      print('{}k images processed'.format((nb_dl+1)/1000))
     if nb_dl == 0:
       all_bottleneck_features = bottleneck_features
       all_joints_info = joint
@@ -223,7 +233,7 @@ if __name__ == '__main__':
     save_bottleneck_features(args, train_dl)
 
     # train the dense layers
-    logging.info('Training dense layers...')
+    # logging.info('Training dense layers...')
     # train_fc_layers(args)
 
   # otherwise train the entire model
