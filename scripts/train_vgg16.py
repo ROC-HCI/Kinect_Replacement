@@ -155,7 +155,7 @@ def train_fc_layers(args):
     for batch in range(nb_batch):
       data_batch = train_data[batch*args.batchsize:(batch+1)*args.batchsize]
       joints_batch = train_joints[batch*args.batchsize:(batch+1)*args.batchsize]
-      
+      import pdb;pdb.set_trace()
       loss = fc_model.train_on_batch(data_batch, joints_batch)
       logging.info('batch{}, loss:{}'.format(batch+1, loss))
 
