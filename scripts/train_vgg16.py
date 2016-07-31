@@ -139,7 +139,9 @@ def save_bottleneck_features(args, train_dl):
 def train_fc_layers(args):
   train_data = np.load(open('all_bottleneck_features.npy'))
   train_joints = np.load(open('all_joints_info.npy'))
-
+  print(train_data.shape)
+  print(train_joints.shape)
+  
   input_shape = train_data.shape[1:]
   fc_model = vgg_16_fc(input_shape, args.joints_num)
   fc_model.compile(optimizer='Adam', loss='mean_squared_error', metrics=['accuracy'])
@@ -155,7 +157,6 @@ def train_fc_layers(args):
     for batch in range(nb_batch):
       data_batch = train_data[batch*args.batchsize:(batch+1)*args.batchsize]
       joints_batch = train_joints[batch*args.batchsize:(batch+1)*args.batchsize]
-      import pdb;pdb.set_trace()
       loss = fc_model.train_on_batch(data_batch, joints_batch)
       logging.info('batch{}, loss:{}'.format(batch+1, loss))
 
@@ -215,7 +216,7 @@ if __name__ == '__main__':
   if args.weights_path:
     # get prediction from conv layers
     small_sample = train_dl[:1000]
-    save_bottleneck_features(args, small_sample)
+    # save_bottleneck_features(args, small_sample)
 
     # train the dense layers
     logging.info('Training dense layers...')
