@@ -149,17 +149,18 @@ def train_fc_layers(args):
 
   for epoch in range(1, args.epoch + 1):
     #shuffle the training set before generating batches
-    logging.info('Shuffling training set...')
-    train_data, train_joints = shuffle(train_data, train_joints)
+    # logging.info('Shuffling training set...')
+    # train_data, train_joints = shuffle(train_data, train_joints)
 
+    model.fit(train_data, train_joints, batch_size=args.batchsize, nb_epoch=args.epoch, shuffle=True)
     #devide training set into batches
-    logging.info('Training epoch{}...'.format(epoch))
-    nb_batch = int(math.ceil(len(train_data)/args.batchsize))
-    for batch in range(nb_batch):
-      data_batch = train_data[batch*args.batchsize:(batch+1)*args.batchsize]
-      joints_batch = train_joints[batch*args.batchsize:(batch+1)*args.batchsize]
-      loss = fc_model.train_on_batch(data_batch, joints_batch)
-      logging.info('batch{}, loss:{}'.format(batch+1, loss))
+    # logging.info('Training epoch{}...'.format(epoch))
+    # nb_batch = int(math.ceil(len(train_data)/args.batchsize))
+    # for batch in range(nb_batch):
+    #   data_batch = train_data[batch*args.batchsize:(batch+1)*args.batchsize]
+    #   joints_batch = train_joints[batch*args.batchsize:(batch+1)*args.batchsize]
+    #   loss = fc_model.train_on_batch(data_batch, joints_batch)
+    #   logging.info('batch{}, loss:{}'.format(batch+1, loss))
 
 def load_pretrain_weights(args, model):
   f = h5py.File(args.weights_path)
@@ -216,21 +217,13 @@ if __name__ == '__main__':
   # load pre-trained model and train part of the model
   if args.weights_path:
     # get prediction from conv layers
-    small_sample = train_dl[:100]
+    small_sample = train_dl[:1000]
     save_bottleneck_features(args, small_sample)
 
     # train the dense layers
     logging.info('Training dense layers...')
     train_fc_layers(args)
 
-    # model, opt = get_model_optimizer(args)
-    # model = load_pretrain_weights(args, model)
-
-    # model.compile(optimizer=opt,
-    #               loss='categorical_crossentropy',
-    #               metrics=['accuracy'])
-
-    # training(args, model, train_dl)
   # otherwise train the entire model
   else:
     # create model and optimizer
