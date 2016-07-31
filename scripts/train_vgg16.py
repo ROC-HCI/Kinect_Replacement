@@ -123,6 +123,7 @@ def save_bottleneck_features(args, train_dl):
   for nb_dl, dl in enumerate(train_dl):
     image, joint = image_transform(args, dl.split(','))
     image = np.expand_dims(image, axis=0)
+    joint = np.expand_dims(joint, axis=0)
     bottleneck_features = conv_model.predict(image)
     if nb_dl == 0:
       all_bottleneck_features = bottleneck_features
@@ -141,7 +142,7 @@ def train_fc_layers(args):
   train_joints = np.load(open('all_joints_info.npy'))
   print(train_data.shape)
   print(train_joints.shape)
-  
+
   input_shape = train_data.shape[1:]
   fc_model = vgg_16_fc(input_shape, args.joints_num)
   fc_model.compile(optimizer='Adam', loss='mean_squared_error', metrics=['accuracy'])
@@ -215,8 +216,8 @@ if __name__ == '__main__':
   # load pre-trained model and train part of the model
   if args.weights_path:
     # get prediction from conv layers
-    small_sample = train_dl[:1000]
-    # save_bottleneck_features(args, small_sample)
+    small_sample = train_dl[:100]
+    save_bottleneck_features(args, small_sample)
 
     # train the dense layers
     logging.info('Training dense layers...')
