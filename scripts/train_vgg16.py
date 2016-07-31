@@ -152,7 +152,7 @@ def train_fc_layers(args):
     # logging.info('Shuffling training set...')
     # train_data, train_joints = shuffle(train_data, train_joints)
 
-    model.fit(train_data, train_joints, batch_size=args.batchsize, nb_epoch=args.epoch, shuffle=True)
+    fc_model.fit(train_data, train_joints, batch_size=args.batchsize, nb_epoch=args.epoch, shuffle=True)
     #devide training set into batches
     # logging.info('Training epoch{}...'.format(epoch))
     # nb_batch = int(math.ceil(len(train_data)/args.batchsize))
@@ -218,7 +218,7 @@ if __name__ == '__main__':
   if args.weights_path:
     # get prediction from conv layers
     small_sample = train_dl[:1000]
-    save_bottleneck_features(args, small_sample)
+    # save_bottleneck_features(args, small_sample)
 
     # train the dense layers
     logging.info('Training dense layers...')
