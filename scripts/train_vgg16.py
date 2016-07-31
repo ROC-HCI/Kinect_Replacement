@@ -147,12 +147,14 @@ def train_fc_layers(args):
   fc_model = vgg_16_fc(input_shape, args.joints_num)
   fc_model.compile(optimizer='Adam', loss='mean_squared_error', metrics=['accuracy'])
 
-  for epoch in range(1, args.epoch + 1):
+  fc_model.fit(train_data, train_joints, batch_size=args.batchsize, nb_epoch=args.epoch, shuffle=True)
+
+  # for epoch in range(1, args.epoch + 1):
     #shuffle the training set before generating batches
     # logging.info('Shuffling training set...')
     # train_data, train_joints = shuffle(train_data, train_joints)
 
-    fc_model.fit(train_data, train_joints, batch_size=args.batchsize, nb_epoch=args.epoch, shuffle=True)
+    
     #devide training set into batches
     # logging.info('Training epoch{}...'.format(epoch))
     # nb_batch = int(math.ceil(len(train_data)/args.batchsize))
@@ -217,12 +219,12 @@ if __name__ == '__main__':
   # load pre-trained model and train part of the model
   if args.weights_path:
     # get prediction from conv layers
-    small_sample = train_dl[:1000]
-    # save_bottleneck_features(args, small_sample)
+    # small_sample = train_dl[:1000]
+    save_bottleneck_features(args, train_dl)
 
     # train the dense layers
     logging.info('Training dense layers...')
-    train_fc_layers(args)
+    # train_fc_layers(args)
 
   # otherwise train the entire model
   else:
