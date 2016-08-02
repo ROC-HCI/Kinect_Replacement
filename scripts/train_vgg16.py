@@ -229,12 +229,12 @@ if __name__ == '__main__':
   # load pre-trained model and train part of the model
   if args.weights_path:
     # get prediction from conv layers
-    # small_sample = train_dl[:1000]
-    save_bottleneck_features(args, train_dl)
+    small_sample = train_dl[:1000]
+    save_bottleneck_features(args, small_sample)
 
     # train the dense layers
-    # logging.info('Training dense layers...')
-    # train_fc_layers(args)
+    logging.info('Training dense layers...')
+    train_fc_layers(args)
 
   # otherwise train the entire model
   else:
