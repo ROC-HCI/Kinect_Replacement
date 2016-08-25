@@ -46,7 +46,7 @@ def vgg_16(joints_num):
   model.add(Dropout(0.5))
   model.add(Dense(4096, activation='relu'))
   model.add(Dropout(0.5))
-  model.add(Dense(joints_num*2, activation='softmax'))
+  model.add(Dense(joints_num*2, activation='relu'))
 
   return model
 

@@ -1,3 +1,10 @@
 data/
 results/
+others/
 shells/
+test_imgs/
+foo_joints.csv
+log.txt
+predict_joints.csv
+test_joints.csv
+

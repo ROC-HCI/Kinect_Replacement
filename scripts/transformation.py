@@ -63,18 +63,18 @@ def image_transform(args, datum):
     image, joints = image_resize(image, joints, args.size)
 
   # joint pos centerization
-  h, w, c = image.shape
-  center_pt = np.array([w / 2, h / 2], dtype=np.float32)  # x,y order
-  joints = list(zip(joints[0::2], joints[1::2]))
+  # h, w, c = image.shape
+  # center_pt = np.array([w / 2, h / 2], dtype=np.float32)  # x,y order
+  # joints = list(zip(joints[0::2], joints[1::2]))
 
-  posi_joints = [(j[0], j[1]) for j in joints if j[0] >= 0 and j[1] >= 0]
-  x, y, ww, hh = cv.boundingRect(np.asarray([posi_joints]))
-  bbox = [(x, y), (x + ww, y + hh)]
+  # posi_joints = [(j[0], j[1]) for j in joints if j[0] >= 0 and j[1] >= 0]
+  # x, y, ww, hh = cv.boundingRect(np.asarray([posi_joints]))
+  # bbox = [(x, y), (x + ww, y + hh)]
 
-  joints = np.array(joints, dtype=np.float32) - center_pt
-  joints[:, 0] /= w
-  joints[:, 1] /= h
-  joints = joints.flatten()
+  # joints = np.array(joints, dtype=np.float32) - center_pt
+  # joints[:, 0] /= w
+  # joints[:, 1] /= h
+  # joints = joints.flatten()
 
   image = image.transpose((2,0,1))
   # image = np.expand_dims(image, axis=0)
