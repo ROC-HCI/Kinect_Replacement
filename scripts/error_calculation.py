@@ -49,12 +49,12 @@ def calculate_loss(pd_file, gt_file):
     pd_datum = pd_data.split(',')
     gt_datum = gt[i].split(',')
 
-    pd_joints = np.asarray([int(float(p)) for p in pd_datum[1:]])
-    gt_joints = np.asarray([int(float(p)) for p in gt_datum[1:]])
+    pd_joints = np.asarray([float(p) for p in pd_datum[1:]])
+    gt_joints = np.asarray([float(p) for p in gt_datum[1:]])
 
     loss[i] = one_joint_loss(pd_joints, gt_joints)
 
-    exp1_pd_joints = pd_joints * 2
+    exp1_pd_joints = gt_joints
     exp1_loss[i] = one_joint_loss(exp1_pd_joints, gt_joints)
 
     exp2_pd_joints = pd_joints * (float(480)/224)

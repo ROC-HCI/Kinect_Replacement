@@ -38,6 +38,8 @@ def test_model(args, test_dl):
   nb_batch = int(math.ceil(len(test_dl)/args.batchsize))
   sum_loss = 0
   prediction_file = open('%s/predict_joints.csv'%args.modeldir, 'w')
+  scale_groundtruth_file = open('%s/scale_groundtruth_joints.csv'%args.modeldir, 'w')
+
   for batch in range(nb_batch):
     test_batch = test_dl[batch*args.batchsize:(batch+1)*args.batchsize]
     test_images_batch, test_joints_batch = transform(args, test_batch)
@@ -50,9 +52,12 @@ def test_model(args, test_dl):
     for i, test_datapoint in enumerate(test_batch):
       filename = test_datapoint.split(',')[0]
       msg = '{},{}\n'.format(filename, ','.join([str(j) for j in predict_joints[i].tolist()]))
+      gt_msg = '{},{}\n'.format(filename, ','.join([str(j) for j in test_joints_batch[i].tolist()]))
       prediction_file.write(msg)
+      scale_groundtruth_file.write(gt_msg)
 
   prediction_file.close()
+  scale_groundtruth_file.close()
 
   avg_loss = sum_loss/nb_batch
   print('Average loss:{}'.format(avg_loss))
@@ -132,14 +137,14 @@ def plot_joints_limbs(args):
   # joints[1::2] = joints[1::2] * (float(720)/224)
   joints = joints * (float(720)/224)
 
-  joints = [int(float(p)) for p in joints]
+  joints = [int(p) for p in joints]
   joints = list(zip(joints[0::2], joints[1::2]))
 
   # draw groundtruth
   image = draw_joints(image, groundtruth_joints)
   # draw prediction
   image = draw_joints(image, joints, False)
-  cv.imwrite('image.jpg', image)
+  cv.imwrite('test_imgs/image.jpg', image)
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
