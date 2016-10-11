@@ -1,0 +1,1 @@
+videoname, normal_video_start_frame,kinect_video_start_frame, normal_video_end_frame,kinect_video_end_frame, raw_normal_video_total_frame
