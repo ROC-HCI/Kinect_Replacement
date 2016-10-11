@@ -8,26 +8,27 @@ from keras.models import Model
 datafile = '/scratch/mtanveer/automanner_dataset.h5'
 trainset = (34,55)
 testset = (55,63)
-nb_iter = 1
+nb_iter = 100
 batch_size = 128
 
 # Data stream generator to flow the frames from the h5 file
-# TODO: Make it randomized
+# TODO: Real-time augmentation (apply blur)
 def data_stream(datafile,datrng,batchsize=128):
     if not os.path.isfile(datafile):
         raise IOError('File not found')
     assert type(datrng) in {list,tuple} and len(datrng) == 2 and datrng[0]<=datrng[1]
     with h5py.File(datafile,'r') as f:
-        for subj in f:
+        for subj in np.random.shuffle(f.keys()):
             if int(subj)>=datrng[0] and int(subj)<datrng[1]:
-                for vid in f[subj]:
+                for vid in np.random.shuffle(f[subj].keys()):
                     v = subj+'/'+vid+'/video_frames'
                     s = subj+'/'+vid+'/joints'
                     ind = 0
                     N = np.size(f[v],axis=0)
                     while ind<N:
                         end = min(ind+batchsize,N)
-                        yield f[v][ind:end,:,:,:],f[s][ind:end,:]
+                        i = np.random.shuffle(np.arrange(ind,end))
+                        yield f[v][i,:,:,:],f[s][i,:]
                         ind+=batchsize
 
 # Vgg model without fully connected layer
@@ -46,15 +47,18 @@ print 'Fully-Connected model prepared'
 
 # Create batch and feed the fully connected neural network
 count = 0
+test_stream = data_stream(datafile,testset,batchsize=1)
 print 'Starting Training ... '
 for iter in range(nb_iter):
     for frames, joints in data_stream(datafile,trainset):
         print 'getting cnn activations ...'
         newinput = vggmodel.predict(frames)
         print 'training FCN ...'
-        fcmodel.train_on_batch(newinput,joints)
+        tr_loss = fcmodel.train_on_batch(newinput,joints)
+        tst_loss = fcmodel.test_on_batch(*next(test_stream))
         count+=len(frames)
-        print 'Data Finished:',count
+        print '# of Data feed:',count, 'Mean Train Loss:',np.mean(tr_loss),
+        'Test Loss:',tst_loss
 print 'Training Finished'
 
 print 'saving weights ...',
