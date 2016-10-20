@@ -5,30 +5,13 @@ from keras.applications import vgg16
 from keras.layers import Flatten, Dense, Input
 from keras.models import Model
 from skeletonutils import skelviz_mayavi as sviz
+from skeletonutils import data_stream
 import matplotlib.pyplot as plt
 
 #datafile = '/scratch/mtanveer/automanner_dataset.h5'
 datafile = '/Users/itanveer/Data/ROCSpeak_BL/allData_h5/automanner_dataset.h5'
 trainset = (34,55)
 testset = (55,63)
-
-# Data stream generator to flow the frames from the h5 file
-def data_stream(datafile,datrng,batchsize=128):
-    if not os.path.isfile(datafile):
-        raise IOError('File not found')
-    assert type(datrng) in {list,tuple} and len(datrng) == 2 and datrng[0]<=datrng[1]
-    with h5py.File(datafile,'r') as f:
-        for subj in f:
-            if int(subj)>=datrng[0] and int(subj)<datrng[1]:
-                for vid in f[subj]:
-                    v = subj+'/'+vid+'/video_frames'
-                    s = subj+'/'+vid+'/joints'
-                    ind = 0
-                    N = np.size(f[v],axis=0)
-                    while ind<N:
-                        end = min(ind+batchsize,N)
-                        yield f[v][ind:end,:,:,:],f[s][ind:end,:]
-                        ind+=batchsize
 
 # Vgg model without fully connected layer
 vggmodel = vgg16.VGG16(include_top=False)
@@ -49,10 +32,6 @@ print 'Model Loaded'
 # Create batch over test dataset and compute loss
 print 'loss calculation'
 for frames,joints in data_stream(datafile,testset):
-    # newinput = vggmodel.predict(frames)
-    # loss = fcmodel.test_on_batch(newinput,joints)
-    # print loss
-
     # Get the prediction
     newinput = vggmodel.predict(frames[:1,:,:,:])
     newoutput = np.insert(fcmodel.predict(newinput)[0,:],0,[0,0])    
@@ -60,9 +39,5 @@ for frames,joints in data_stream(datafile,testset):
     plt.ion()
     plt.show()
     sviz.drawskel(newoutput)
-    
-
-
-    import pdb; pdb.set_trace()  # breakpoint cd469692 //
 
 
