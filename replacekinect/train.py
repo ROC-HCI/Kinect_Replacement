@@ -1,11 +1,13 @@
 import h5py
 import numpy as np
+import argparse
 import itertools as it
 from keras.applications import vgg16
 from keras.layers import Flatten, Dense, Input
 from keras.models import Model
 from skeletonutils import data_stream_shuffle
 
+parser = argparse.ArgumentParser('Module for training neural network')
 datafile = '/scratch/mtanveer/automanner_dataset.h5'
 #datafile = '/Users/itanveer/Data/ROCSpeak_BL/allData_h5/automanner_dataset.h5'
 trainset = (34,55)
@@ -50,7 +52,8 @@ for iter in range(nb_iter):
         count+=len(frames)
         print '# of Data fed:',count, 'Mean Train Loss:',np.mean(tr_loss),\
             'Test Loss:',tst_loss[0]
-    print 'saving weights ...',
+    print 'iteration:',iter, 'saving weights ...',
+    count = 0
     fcmodel.save_weights(out_prefix+weightfile)
     print 'done.'
 print 'Training Finished'
