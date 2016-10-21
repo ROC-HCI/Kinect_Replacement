@@ -1,11 +1,10 @@
-import os
 import h5py
 import numpy as np
-import argparse
+import itertools as it
 from keras.applications import vgg16
 from keras.layers import Flatten, Dense, Input
 from keras.models import Model
-from skeletonutils import data_stream, data_stream_shuffle_reset
+from skeletonutils import data_stream_shuffle
 
 datafile = '/scratch/mtanveer/automanner_dataset.h5'
 #datafile = '/Users/itanveer/Data/ROCSpeak_BL/allData_h5/automanner_dataset.h5'
@@ -38,10 +37,10 @@ print 'Fully-Connected model prepared'
 
 # Create batch and feed the fully connected neural network
 count = 0
-test_stream = data_stream_shuffle_reset(datafile,testset,batchsize=1)
+test_stream = it.cycle(data_stream_shuffle(datafile,testset,batchsize=1))
 print 'Starting Training ... '
 for iter in range(nb_iter):
-    for frames, joints in data_stream(datafile,trainset,batchsize=batch_size):
+    for frames, joints in data_stream_shuffle(datafile,trainset,batchsize=batch_size):
         newinput = vggmodel.predict(frames) # pass through CNN layers
         tr_loss = fcmodel.train_on_batch(newinput,joints) # train on batch
         # test on train data

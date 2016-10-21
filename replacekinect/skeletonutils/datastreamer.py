@@ -1,48 +1,38 @@
 import h5py
 import os
 import numpy as np
+import itertools as it
 
-# Data stream generator to flow the frames from the h5 file
-def data_stream(datafile,datrng,batchsize=128):
+# Data stream generator with better randomization
+def data_stream_shuffle(datafile,datrng,batchsize=128):
+    # Input check and flatten until the lowest layer
     if not os.path.isfile(datafile):
         raise IOError('File not found')
     assert type(datrng) in {list,tuple} and len(datrng) == 2 and datrng[0]<=datrng[1]
     with h5py.File(datafile,'r') as f:
+        # Flatten by adding all nodes (until the lowest layer) in a list
+        all_recent_parents = []
         for subj in f:
             if int(subj)>=datrng[0] and int(subj)<datrng[1]:
                 for vid in f[subj]:
-                    v = subj+'/'+vid+'/video_frames'
-                    s = subj+'/'+vid+'/joints'
-                    ind = 0
-                    N = np.size(f[v],axis=0)
-                    while ind<N:
-                        end = min(ind+batchsize,N)
-                        yield f[v][ind:end,:,:,:],f[s][ind:end,:]
-                        ind+=batchsize
+                    all_recent_parents.append(subj+'/'+vid)
 
-# Data stream generator to flow the frames from the h5 file
-# Shuffle the dataset and reset once the generator ends
-def data_stream_shuffle_reset(datafile,datrng,batchsize=128):
-    if not os.path.isfile(datafile):
-        raise IOError('File not found')
-    assert type(datrng) in {list,tuple} and len(datrng) == 2 and datrng[0]<=datrng[1]
-    while True:
-        with h5py.File(datafile,'r') as f:
-            allsubj = f.keys()
-            np.random.shuffle(allsubj)
-            for subj in allsubj:
-                if int(subj)>=datrng[0] and int(subj)<datrng[1]:
-                    allvids = f[subj].keys() 
-                    np.random.shuffle(allvids)
-                    for vid in allvids:
-                        v = subj+'/'+vid+'/video_frames'
-                        s = subj+'/'+vid+'/joints'
-                        ind = 0
-                        N = np.size(f[v],axis=0)
-                        while ind<N:
-                            end = min(ind+batchsize,N)
-                            i = np.arange(end-ind)
-                            np.random.shuffle(i)
-                            frames,joints = f[v][ind:end,:,:,:],f[s][ind:end,:]
-                            yield frames[i,:,:,:],joints[i,:]
-                            ind+=batchsize
+        # rem is the remainder child(ren) index of the current parent
+        rem = {aparent:range(len(f[aparent+'/video_frames'][:])) \
+            for aparent in all_recent_parents}
+        batch_v = []
+        batch_j = []
+        while rem:
+            # sample a parent
+            aparent = np.random.choice(rem.keys())
+            if rem[aparent]:
+                # sample and update the remainder
+                x = np.random.choice(rem[aparent])
+                rem[aparent].remove(x)
+                batch_v.append(f[aparent+'/video_frames'][x,:,:,:])
+                batch_j.append(f[aparent+'/joints'][x,:])
+            else:
+                del rem[aparent]
+            if len(batch_v)==batchsize or (not rem and len(batch_v)>0):
+                yield np.array(batch_v), np.array(batch_j)
+                batch_v,batch_j = [],[]
