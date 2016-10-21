@@ -5,7 +5,7 @@ from keras.applications import vgg16
 from keras.layers import Flatten, Dense, Input
 from keras.models import Model
 from skeletonutils import skelviz_mayavi as sviz
-from skeletonutils import data_stream
+from skeletonutils import data_stream_shuffle
 import matplotlib.pyplot as plt
 
 #datafile = '/scratch/mtanveer/automanner_dataset.h5'
@@ -31,7 +31,7 @@ print 'Model Loaded'
 
 # Create batch over test dataset and compute loss
 print 'loss calculation'
-for frames,joints in data_stream(datafile,testset):
+for frames,joints in data_stream_shuffle(datafile,trainset):
     # Get the prediction
     newinput = vggmodel.predict(frames[:1,:,:,:])
     newoutput = np.insert(fcmodel.predict(newinput)[0,:],0,[0,0])    
