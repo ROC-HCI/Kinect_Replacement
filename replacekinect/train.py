@@ -9,7 +9,10 @@ from skeletonutils import data_stream_shuffle
 parser = argparse.ArgumentParser('Module for training neural network to replace kinect')
 parser.add_argument('datafile',help='Full path of the data (h5) file')
 parser.add_argument('-m',dest='modelid',type=int,default=1,\
-    help='ID of the preset model to be loaded')
+    help='ID of the preset model to be loaded. ID = 1 is the original preset model \
+    with 5 blocks of CNN from VGG16, two FC layers with 1024 relu neurons, and one FC \
+    layer with 60 linear neurons. ID = 2 is similar, except 4 blocks of CNN from vgg. \
+    ID = 3 has 3 blocks of CNN.')
 parser.add_argument('-i',dest='nb_iter',type=int,default=10,\
     help='Total number of iterations')
 parser.add_argument('-b',dest='batch_size',type=int,default=128,help='Batch Size')
@@ -30,6 +33,12 @@ testset = (55,63)
 if args.modelid==1:
     from learningtools.preset_models import original
     cnnmodel,model=original(args.load_weights,args.weightfile,args.stop_summary)
+elif args.modelid==2:
+    from learningtools.preset_models import fourcnn
+    cnnmodel,model=lesscnn(args.load_weights,args.weightfile,args.stop_summary,4)
+elif args.modelid==3:
+    from learningtools.preset_models import fourcnn
+    cnnmodel,model=lesscnn(args.load_weights,args.weightfile,args.stop_summary,3)
 
 # Create batch and feed the fully connected neural network
 count = 0
