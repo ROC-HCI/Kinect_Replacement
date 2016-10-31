@@ -55,7 +55,7 @@ elif args.modelid==4:
         args.stop_summary)
 elif args.modelid==5:
     from learningtools.preset_models import doubledense
-    cnnmodel,model=doubledense(args.load_weights,args.weightfile,args.vggweightfile,\
+    cnnmodel,model=doubledense(args.load_weights,args.weightfile,\
         args.stop_summary)
 
 # Create batch and feed the fully connected neural network

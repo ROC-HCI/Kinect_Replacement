@@ -33,7 +33,7 @@ def original(loadweights,weightfile,stop_summary):
 
 # The number of fully connected layer is doubled, as well as
 # the number of neurons per layer
-def doubledense(loadweights,weightfile,stop_summary):
+def doubledense(loadweights,weightfile,vggweightfile,stop_summary):
     # Vgg model without fully connected layer
     vggmodel = vgg16.VGG16(include_top=False)
     # create fully connected layer
@@ -104,6 +104,18 @@ def tunable (loadweights,weightfile,vggweightfile,stop_summary):
     x = Dense(1024, activation='relu',name='fc2_fourcnn')(x)
     x = Dense(60,activation='linear',name='predictions_fourcnn')(x)
     fcmodel = Model(fc_input,x)
+    # Load the model weights if instructed
+    if loadweights:
+        fcmodel.load_weights(weightfile)
+    # Compile and print summary
+    fcmodel.compile(loss='mean_squared_error',optimizer='adagrad',\
+        metrics=['accuracy'])
+    if not stop_summary:
+        print 'Convolutional Part:'
+        vggmodel.summary()
+        print 'Fully Connected Part:'
+        fcmodel.summary()
+    print 'Model loaded'
     return vggmodel,fcmodel
 
 # Returns a custom vgg16 model with specified number of blocks
