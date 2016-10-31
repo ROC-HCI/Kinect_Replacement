@@ -14,16 +14,19 @@ parser.add_argument('-m',dest='modelid',type=int,default=1,\
     layer with 60 linear neurons. ID = 2 is similar, except 4 blocks of CNN from vgg. \
     ID = 3 has 3 blocks of CNN.')
 parser.add_argument('-i',dest='nb_iter',type=int,default=10,\
-    help='Total number of iterations')
-parser.add_argument('-b',dest='batch_size',type=int,default=128,help='Batch Size')
+    help='Total number of iterations. (default: %(default)s)')
+parser.add_argument('-b',dest='batch_size',type=int,default=128,\
+    help='Batch Size (default: %(default)s)')
 parser.add_argument('--load_weights',dest='load_weights',action='store_true',\
-    default=False,help='Load previously saved weights')
-parser.add_argument('--stop_summary',dest='stop_summary',action='store_true',\
-    default=False,help='Stops printing the model summary before training')
+    default=False,help='Load previously saved weights (default: %(default)s)')
+parser.add_argument('--stop_summary',dest='stop_summary',action='store_true',default=False,\
+    help='Stops printing the model summary before training (default: %(default)s)')
 parser.add_argument('--weightfile',dest='weightfile',default='weightfile.h5',\
-    help='Weight filename')
+    help='Weight filename (default: %(default)s)')
+parser.add_argument('--vggweightfile',dest='vggweightfile',default='vgg16_weights.h5',\
+    help='Weight filename (default: %(default)s)')
 parser.add_argument('--out_prefix',dest='out_prefix',default='',\
-    help='A prefix for the output weight file')
+    help='A prefix for the output weight file (default: <Empty String>')
 args = parser.parse_args()
 
 # Training test split
@@ -34,11 +37,13 @@ if args.modelid==1:
     from learningtools.preset_models import original
     cnnmodel,model=original(args.load_weights,args.weightfile,args.stop_summary)
 elif args.modelid==2:
-    from learningtools.preset_models import fourcnn
-    cnnmodel,model=lesscnn(args.load_weights,args.weightfile,args.stop_summary,4)
+    from learningtools.preset_models import lesscnn
+    cnnmodel,model=lesscnn(args.load_weights,args.weightfile,args.vggweightfile,\
+        args.stop_summary,4)
 elif args.modelid==3:
-    from learningtools.preset_models import fourcnn
-    cnnmodel,model=lesscnn(args.load_weights,args.weightfile,args.stop_summary,3)
+    from learningtools.preset_models import lesscnn
+    cnnmodel,model=lesscnn(args.load_weights,args.weightfile,args.vggweightfile,\
+        args.stop_summary,3)
 
 # Create batch and feed the fully connected neural network
 count = 0

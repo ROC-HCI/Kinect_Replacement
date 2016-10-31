@@ -32,11 +32,11 @@ def original(loadweights,weightfile,stop_summary):
     return vggmodel, fcmodel
 
 # This is a preset model with four convolutional blocks
-def lesscnn (loadweights,weightfile,stop_summary,nb_cnnblocks):
+def lesscnn (loadweights,weightfile,vggweightfile,\
+    stop_summary,nb_cnnblocks):
     # Vgg model without fully connected layer
     vggmodel = custom_vgg16(4)
-    if loadweights:
-        vggmodel = load_pretrained_weights(weightfile,vggmodel)
+    vggmodel = load_pretrained_weights(vggweightfile,vggmodel)        
     # create fully connected layer
     fc_input = Input(shape=(512,11,20))
     x = Flatten(name='flatten_fourcnn')(fc_input)
@@ -44,6 +44,9 @@ def lesscnn (loadweights,weightfile,stop_summary,nb_cnnblocks):
     x = Dense(1024, activation='relu',name='fc2_fourcnn')(x)
     x = Dense(60,activation='linear',name='predictions_fourcnn')(x)
     fcmodel = Model(fc_input,x)
+    # Load the model weights if instructed
+    if loadweights:
+        fcmodel.load_weights(weightfile)    
     # Compile and print summary
     fcmodel.compile(loss='mean_squared_error',optimizer='adagrad',\
         metrics=['accuracy'])
@@ -100,9 +103,9 @@ def custom_vgg16(total_blks):
     return model
 
 # Loads the pretrained weights for a given vgg16 model
-def load_pretrained_weights(weightfile, model):
+def load_pretrained_weights(vggweightfile, model):
     # Open vgg16_weights.h5
-    f = h5py.File(weightfile)
+    f = h5py.File(vggweightfile)
     # Total number of layers in the model
     n = len(model.layers)
     for k in range(n):
