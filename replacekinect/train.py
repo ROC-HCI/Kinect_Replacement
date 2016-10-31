@@ -71,7 +71,7 @@ for iter_ in range(args.nb_iter):
     print 'iteration:',iter_, 'saving weights ...',
     count = 0
     # Save the model
-    if prefit:
+    if args.prefit:
         model.save_weights(args.out_prefix+str(iter_)+args.weightfile)
     else:
         model.save_weights(args.out_prefix+args.weightfile)
