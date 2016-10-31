@@ -27,6 +27,9 @@ parser.add_argument('--vggweightfile',dest='vggweightfile',default='vgg16_weight
     help='Weight filename (default: %(default)s)')
 parser.add_argument('--out_prefix',dest='out_prefix',default='',\
     help='A prefix for the output weight file (default: <Empty String>')
+parser.add_argument('--prefit',dest='prefit',action='store_true',default=False,\
+    help='Prefix the output weight filename with the number of iterations so that \
+    they are not overwritten in different iterations (default: %(default)s)')
 args = parser.parse_args()
 
 # Training test split
@@ -50,7 +53,7 @@ count = 0
 # Test data generator (Never ending)
 test_stream = it.cycle(data_stream_shuffle(args.datafile,testset,batchsize=args.batch_size))
 print 'Starting Training ... '
-for iter in range(args.nb_iter):
+for iter_ in range(args.nb_iter):
     # Flow data from the training data stream
     for frames, joints in data_stream_shuffle(args.datafile,trainset,batchsize=args.batch_size):
         newinput = cnnmodel.predict(frames) # pass through CNN layers
@@ -65,10 +68,13 @@ for iter in range(args.nb_iter):
         print '# of Data fed:',count, 'Mean Train Loss:',np.mean(tr_loss),\
             'Test Loss:',tst_loss[0]
         sys.stdout.flush()
-    print 'iteration:',iter, 'saving weights ...',
+    print 'iteration:',iter_, 'saving weights ...',
     count = 0
     # Save the model
-    model.save_weights(args.out_prefix+args.weightfile)
+    if prefit:
+        model.save_weights(args.out_prefix+str(iter_)+args.weightfile)
+    else:
+        model.save_weights(args.out_prefix+args.weightfile)
     print 'done.'
 print 'Training Finished'
 
