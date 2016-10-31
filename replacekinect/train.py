@@ -13,7 +13,9 @@ parser.add_argument('-m',dest='modelid',type=int,default=1,\
     with 5 blocks of CNN from VGG16, two FC layers with 1024 relu neurons, and one FC \
     layer with 60 linear neurons. ID = 2 is similar, except 4 blocks of CNN from vgg. \
     ID = 3 has 3 blocks of CNN. ID = 4 has a block of tunable CNN. In ID = 5, number \
-    of dense layers and neurons are doubled.')
+    of dense layers and neurons are doubled. ID = 6 doubledense with batch normalization \
+    ID = 7 doubledense, BN, and regularization (0.01 l1). ID = 8 has 3 cnn blks, dd, \
+    BN, regularization. ID = 9 has residual doubledense with BN, rg')
 parser.add_argument('-i',dest='nb_iter',type=int,default=10,\
     help='Total number of iterations. (default: %(default)s)')
 parser.add_argument('-b',dest='batch_size',type=int,default=128,\
@@ -57,6 +59,24 @@ elif args.modelid==5:
     from learningtools.preset_models import doubledense
     cnnmodel,model=doubledense(args.load_weights,args.weightfile,\
         args.stop_summary)
+elif args.modelid==6:
+    from learningtools.preset_models import doubledense_bn
+    cnnmodel,model=doubledense_bn(args.load_weights,args.weightfile,\
+        args.stop_summary)
+elif args.modelid == 7:
+    from learningtools.preset_models import doubledense_bn_rg
+    cnnmodel,model=doubledense_bn_rg(args.load_weights,args.weightfile,\
+        args.stop_summary)
+elif args.modelid == 8:
+    from learningtools.preset_models import lesscnn_dd_bn_rg
+    cnnmodel,model=lesscnn_dd_bn_rg(args.load_weights,args.weightfile,\
+        args.vggweightfile,args.stop_summary,3)
+elif args.modelid == 9:
+    from learningtools.preset_models import residual_bn_rg
+    cnnmodel,model=residual_bn_rg(args.load_weights,args.weightfile,\
+        args.stop_summary)
+else:
+    raise ValueError('Model ID not recognized')    
 
 # Create batch and feed the fully connected neural network
 count = 0

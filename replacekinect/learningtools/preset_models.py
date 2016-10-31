@@ -1,7 +1,9 @@
 from keras.applications import vgg16
-from keras.layers import Flatten, Dense, Input, Dropout
+from keras.layers import Flatten, Dense, Input, Dropout, Activation, merge
 from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.models import Model, Sequential
+from keras.layers.normalization import BatchNormalization
+from keras.regularizers import l1
 import h5py
 
 
@@ -59,15 +61,109 @@ def doubledense(loadweights,weightfile,stop_summary):
     print 'Model loaded'
     return vggmodel, fcmodel
 
+# Double dense with batch normalization
+def doubledense_bn(loadweights,weightfile,stop_summary):
+    # Vgg model without fully connected layer
+    vggmodel = vgg16.VGG16(include_top=False)
+    # create fully connected layer
+    fc_input = Input(shape=(512,5,10))
+    x = Flatten(name='flatten')(fc_input)
+    
+    x = Dense(2048,name='fc1')(x)
+    x = BatchNormalization(name='fc1_bn')(x)
+    x = Activation('relu',name='fc1_relu')(x)
+    
+    x = Dense(2048,name='fc2')(x)
+    x = BatchNormalization(name='fc2_bn')(x)
+    x = Activation('relu',name='fc2_relu')(x)
+
+    x = Dense(2048,name='fc3')(x)
+    x = BatchNormalization(name='fc3_bn')(x)
+    x = Activation('relu',name='fc3_relu')(x)
+
+    x = Dense(2048,name='fc4')(x)
+    x = BatchNormalization(name='fc4_bn')(x)
+    x = Activation('relu',name='fc4_relu')(x)
+
+    x = Dense(60,activation='linear',name='predictions')(x)
+    fcmodel = Model(fc_input,x)
+
+    # Load the model weights if instructed
+    if loadweights:
+        fcmodel.load_weights(weightfile)
+
+    # Compile and print summary
+    fcmodel.compile(loss='mean_squared_error',optimizer='adagrad',\
+        metrics=['accuracy'])
+    if not stop_summary:
+        print 'Convolutional Part:'
+        vggmodel.summary()
+        print 'Fully Connected Part:'
+        fcmodel.summary()
+    print 'Model loaded'
+    return vggmodel, fcmodel
+
+# Double dense with batch normalization
+def doubledense_bn_rg(loadweights,weightfile,stop_summary):
+    # Vgg model without fully connected layer
+    vggmodel = vgg16.VGG16(include_top=False)
+    # create fully connected layer
+    fc_input = Input(shape=(512,5,10))
+    x = Flatten(name='flatten')(fc_input)
+    
+    x = Dense(2048,W_regularizer=l1(0.01),name='fc1')(x)
+    x = BatchNormalization(name='fc1_bn')(x)
+    x = Activation('relu',name='fc1_relu')(x)
+    
+    x = Dense(2048,W_regularizer=l1(0.01),name='fc2')(x)
+    x = BatchNormalization(name='fc2_bn')(x)
+    x = Activation('relu',name='fc2_relu')(x)
+
+    x = Dense(2048,W_regularizer=l1(0.01),name='fc3')(x)
+    x = BatchNormalization(name='fc3_bn')(x)
+    x = Activation('relu',name='fc3_relu')(x)
+
+    x = Dense(2048,W_regularizer=l1(0.01),name='fc4')(x)
+    x = BatchNormalization(name='fc4_bn')(x)
+    x = Activation('relu',name='fc4_relu')(x)
+
+    x = Dense(60,activation='linear',name='predictions')(x)
+    fcmodel = Model(fc_input,x)
+
+    # Load the model weights if instructed
+    if loadweights:
+        fcmodel.load_weights(weightfile)
+
+    # Compile and print summary
+    fcmodel.compile(loss='mean_squared_error',optimizer='adagrad',\
+        metrics=['accuracy'])
+    if not stop_summary:
+        print 'Convolutional Part:'
+        vggmodel.summary()
+        print 'Fully Connected Part:'
+        fcmodel.summary()
+    print 'Model loaded'
+    return vggmodel, fcmodel
+
+
 # This is a preset model with four convolutional blocks
 def lesscnn (loadweights,weightfile,vggweightfile,\
     stop_summary,nb_cnnblocks):
     # Vgg model without fully connected layer
-    vggmodel = custom_vgg16(4)
+    vggmodel = custom_vgg16(nb_cnnblocks)
     vggmodel = load_pretrained_weights(vggweightfile,vggmodel)        
     # create fully connected layer
-    fc_input = Input(shape=(512,11,20))
-    x = Flatten(name='flatten_fourcnn')(fc_input)
+    if nb_cnnblocks == 4:
+        fc_input = Input(shape=(512,11,20))
+    elif nb_cnnblocks == 3:
+        fc_input = Input(shape=(256,22,40))
+    elif nb_cnnblocks == 2:
+        fc_input = Input(shape=(128,45,80))
+    elif nb_cnnblocks == 1:
+        fc_input = Input(shape=(64,90,160))
+    else:
+        raise ValueError('number of cnnblocks must be an int within [1,5)')
+    x = Flatten(name='flatten_lesscnn')(fc_input)
     x = Dense(1024, activation='relu',name='fc1_lesscnn')(x)
     x = Dense(1024, activation='relu',name='fc2_lesscnn')(x)
     x = Dense(60,activation='linear',name='predictions_lesscnn')(x)
@@ -75,6 +171,108 @@ def lesscnn (loadweights,weightfile,vggweightfile,\
     # Load the model weights if instructed
     if loadweights:
         fcmodel.load_weights(weightfile)    
+    # Compile and print summary
+    fcmodel.compile(loss='mean_squared_error',optimizer='adagrad',\
+        metrics=['accuracy'])
+    if not stop_summary:
+        print 'Convolutional Part:'
+        vggmodel.summary()
+        print 'Fully Connected Part:'
+        fcmodel.summary()
+    print 'Model loaded'
+    return vggmodel, fcmodel
+
+# Preset model with cnn layers < 5, double dense, batch normalization
+# and regularization
+def lesscnn_dd_bn_rg (loadweights,weightfile,vggweightfile,\
+    stop_summary,nb_cnnblocks):
+    # Vgg model without fully connected layer
+    vggmodel = custom_vgg16(nb_cnnblocks)
+    vggmodel = load_pretrained_weights(vggweightfile,vggmodel)        
+    # create fully connected layer
+    if nb_cnnblocks == 4:
+        fc_input = Input(shape=(512,11,20))
+    elif nb_cnnblocks == 3:
+        fc_input = Input(shape=(256,22,40))
+    elif nb_cnnblocks == 2:
+        fc_input = Input(shape=(128,45,80))
+    elif nb_cnnblocks == 1:
+        fc_input = Input(shape=(64,90,160))
+    else:
+        raise ValueError('number of cnnblocks must be an int within [1,5)')
+    
+    # Creating the fully connected layers
+    x = Flatten(name='flatten')(fc_input)
+    
+    x = Dense(2048,W_regularizer=l1(0.01),name='fc1')(x)
+    x = BatchNormalization(name='fc1_bn')(x)
+    x = Activation('relu',name='fc1_relu')(x)
+    
+    x = Dense(2048,W_regularizer=l1(0.01),name='fc2')(x)
+    x = BatchNormalization(name='fc2_bn')(x)
+    x = Activation('relu',name='fc2_relu')(x)
+
+    x = Dense(2048,W_regularizer=l1(0.01),name='fc3')(x)
+    x = BatchNormalization(name='fc3_bn')(x)
+    x = Activation('relu',name='fc3_relu')(x)
+
+    x = Dense(2048,W_regularizer=l1(0.01),name='fc4')(x)
+    x = BatchNormalization(name='fc4_bn')(x)
+    x = Activation('relu',name='fc4_relu')(x)
+
+    x = Dense(60,activation='linear',name='predictions')(x)
+    fcmodel = Model(fc_input,x)
+    # Load the model weights if instructed
+    if loadweights:
+        fcmodel.load_weights(weightfile)    
+    # Compile and print summary
+    fcmodel.compile(loss='mean_squared_error',optimizer='adagrad',\
+        metrics=['accuracy'])
+    if not stop_summary:
+        print 'Convolutional Part:'
+        vggmodel.summary()
+        print 'Fully Connected Part:'
+        fcmodel.summary()
+    print 'Model loaded'
+    return vggmodel, fcmodel
+
+# Double dense with batch normalization
+def residual_bn_rg(loadweights,weightfile,stop_summary):
+    # Vgg model without fully connected layer
+    vggmodel = vgg16.VGG16(include_top=False)
+    # create fully connected layer
+    fc_input = Input(shape=(512,5,10))
+    x1 = Flatten(name='flatten')(fc_input)
+    
+    x2 = Dense(2048,W_regularizer=l1(0.01),name='fc1')(x1)
+    x2 = BatchNormalization(name='fc1_bn')(x2)
+    x2 = Activation('relu',name='fc1_relu')(x2)
+
+    x3 = merge([x1,x2],mode = 'sum',name='res_1')
+    
+    x4 = Dense(2048,W_regularizer=l1(0.01),name='fc2')(x3)
+    x4 = BatchNormalization(name='fc2_bn')(x4)
+    x4 = Activation('relu',name='fc2_relu')(x4)
+
+    x5 = merge([x3,x4],mode = 'sum',name='res_2')
+
+    x6 = Dense(2048,W_regularizer=l1(0.01),name='fc3')(x5)
+    x6 = BatchNormalization(name='fc3_bn')(x6)
+    x6 = Activation('relu',name='fc3_relu')(x6)
+
+    x7 = merge([x5,x6],mode = 'sum',name='res_3')
+
+    x = Dense(2048,W_regularizer=l1(0.01),name='fc4')(x7)
+    x = BatchNormalization(name='fc4_bn')(x)
+    x = Activation('relu',name='fc4_relu')(x)
+
+    x = Dense(60,activation='linear',name='predictions')(x)
+    fcmodel = Model(fc_input,x)
+
+    # Load the model weights if instructed
+    if loadweights:
+        fcmodel.load_weights(weightfile)
+
     # Compile and print summary
     fcmodel.compile(loss='mean_squared_error',optimizer='adagrad',\
         metrics=['accuracy'])
