@@ -3,7 +3,7 @@ from keras.layers import Flatten, Dense, Input, Dropout, Activation, merge
 from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.models import Model, Sequential
 from keras.layers.normalization import BatchNormalization
-from keras.regularizers import activity_l1
+from keras.regularizers import activity_l1,l1
 import h5py
 
 
