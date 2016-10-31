@@ -31,6 +31,34 @@ def original(loadweights,weightfile,stop_summary):
     print 'Model loaded'
     return vggmodel, fcmodel
 
+# The number of fully connected layer is doubled, as well as
+# the number of neurons per layer
+def doubledense(loadweights,weightfile,stop_summary):
+    # Vgg model without fully connected layer
+    vggmodel = vgg16.VGG16(include_top=False)
+    # create fully connected layer
+    fc_input = Input(shape=(512,5,10))
+    x = Flatten(name='flatten')(fc_input)
+    x = Dense(2048, activation='relu',name='fc1')(x)
+    x = Dense(2048, activation='relu',name='fc2')(x)
+    x = Dense(2048, activation='relu',name='fc1')(x)
+    x = Dense(2048, activation='relu',name='fc2')(x)
+    x = Dense(60,activation='linear',name='predictions')(x)
+    fcmodel = Model(fc_input,x)
+    # Load the model weights if instructed
+    if loadweights:
+        fcmodel.load_weights(weightfile)
+    # Compile and print summary
+    fcmodel.compile(loss='mean_squared_error',optimizer='adagrad',\
+        metrics=['accuracy'])
+    if not stop_summary:
+        print 'Convolutional Part:'
+        vggmodel.summary()
+        print 'Fully Connected Part:'
+        fcmodel.summary()
+    print 'Model loaded'
+    return vggmodel, fcmodel
+
 # This is a preset model with four convolutional blocks
 def lesscnn (loadweights,weightfile,vggweightfile,\
     stop_summary,nb_cnnblocks):
@@ -40,9 +68,9 @@ def lesscnn (loadweights,weightfile,vggweightfile,\
     # create fully connected layer
     fc_input = Input(shape=(512,11,20))
     x = Flatten(name='flatten_fourcnn')(fc_input)
-    x = Dense(1024, activation='relu',name='fc1_fourcnn')(x)
-    x = Dense(1024, activation='relu',name='fc2_fourcnn')(x)
-    x = Dense(60,activation='linear',name='predictions_fourcnn')(x)
+    x = Dense(1024, activation='relu',name='fc1_lesscnn')(x)
+    x = Dense(1024, activation='relu',name='fc2_lesscnn')(x)
+    x = Dense(60,activation='linear',name='predictions_lesscnn')(x)
     fcmodel = Model(fc_input,x)
     # Load the model weights if instructed
     if loadweights:
@@ -57,6 +85,26 @@ def lesscnn (loadweights,weightfile,vggweightfile,\
         fcmodel.summary()
     print 'Model loaded'
     return vggmodel, fcmodel
+
+# With the four preset VGG16 block, one is kept tunable
+def tunable (loadweights,weightfile,vggweightfile,stop_summary):
+    # Vgg model without fully connected layer
+    vggmodel = custom_vgg16(4)
+    vggmodel = load_pretrained_weights(vggweightfile,vggmodel)    
+    # Create tunable + fully connected
+    fc_input = Input(shape=(512,11,20))
+    x = Convolution2D(512, 3, 3, activation='relu', border_mode='same',\
+     name='block5_conv1')(fc_input)
+    x = Convolution2D(512, 3, 3, activation='relu', border_mode='same',\
+     name='block5_conv2')(x)
+    x = Convolution2D(512, 3, 3, activation='relu', border_mode='same',\
+     name='block5_conv3')(x)
+    x = Flatten(name='flatten_fourcnn')(x)
+    x = Dense(1024, activation='relu',name='fc1_fourcnn')(x)
+    x = Dense(1024, activation='relu',name='fc2_fourcnn')(x)
+    x = Dense(60,activation='linear',name='predictions_fourcnn')(x)
+    fcmodel = Model(fc_input,x)
+    return vggmodel,fcmodel
 
 # Returns a custom vgg16 model with specified number of blocks
 def custom_vgg16(total_blks):

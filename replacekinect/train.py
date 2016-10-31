@@ -12,7 +12,8 @@ parser.add_argument('-m',dest='modelid',type=int,default=1,\
     help='ID of the preset model to be loaded. ID = 1 is the original preset model \
     with 5 blocks of CNN from VGG16, two FC layers with 1024 relu neurons, and one FC \
     layer with 60 linear neurons. ID = 2 is similar, except 4 blocks of CNN from vgg. \
-    ID = 3 has 3 blocks of CNN.')
+    ID = 3 has 3 blocks of CNN. ID = 4 has a block of tunable CNN. In ID = 5, number \
+    of dense layers and neurons are doubled.')
 parser.add_argument('-i',dest='nb_iter',type=int,default=10,\
     help='Total number of iterations. (default: %(default)s)')
 parser.add_argument('-b',dest='batch_size',type=int,default=128,\
@@ -36,6 +37,7 @@ args = parser.parse_args()
 trainset = (34,55)
 testset = (55,63)
 
+# Parse Modelid
 if args.modelid==1:
     from learningtools.preset_models import original
     cnnmodel,model=original(args.load_weights,args.weightfile,args.stop_summary)
@@ -47,6 +49,14 @@ elif args.modelid==3:
     from learningtools.preset_models import lesscnn
     cnnmodel,model=lesscnn(args.load_weights,args.weightfile,args.vggweightfile,\
         args.stop_summary,3)
+elif args.modelid==4:
+    from learningtools.preset_models import tunable
+    cnnmodel,model=tunable(args.load_weights,args.weightfile,args.vggweightfile,\
+        args.stop_summary)
+elif args.modelid==5:
+    from learningtools.preset_models import doubledense
+    cnnmodel,model=doubledense(args.load_weights,args.weightfile,args.vggweightfile,\
+        args.stop_summary)
 
 # Create batch and feed the fully connected neural network
 count = 0
