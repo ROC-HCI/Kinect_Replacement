@@ -33,7 +33,7 @@ def original(loadweights,weightfile,stop_summary):
 
 # The number of fully connected layer is doubled, as well as
 # the number of neurons per layer
-def doubledense(loadweights,weightfile,vggweightfile,stop_summary):
+def doubledense(loadweights,weightfile,stop_summary):
     # Vgg model without fully connected layer
     vggmodel = vgg16.VGG16(include_top=False)
     # create fully connected layer
