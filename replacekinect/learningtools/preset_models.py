@@ -3,7 +3,7 @@ from keras.layers import Flatten, Dense, Input, Dropout, Activation, merge
 from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.models import Model, Sequential
 from keras.layers.normalization import BatchNormalization
-from keras.regularizers import l1
+from keras.regularizers import activity_l1
 import h5py
 
 
@@ -204,19 +204,19 @@ def lesscnn_dd_bn_rg (loadweights,weightfile,vggweightfile,\
     # Creating the fully connected layers
     x = Flatten(name='flatten')(fc_input)
     
-    x = Dense(2048,W_regularizer=l1(0.01),name='fc1')(x)
+    x = Dense(2048,activity_regularizer=activity_l1(0.01),name='fc1')(x)
     x = BatchNormalization(name='fc1_bn')(x)
     x = Activation('relu',name='fc1_relu')(x)
     
-    x = Dense(2048,W_regularizer=l1(0.01),name='fc2')(x)
+    x = Dense(2048,activity_regularizer=activity_l1(0.01),name='fc2')(x)
     x = BatchNormalization(name='fc2_bn')(x)
     x = Activation('relu',name='fc2_relu')(x)
 
-    x = Dense(2048,W_regularizer=l1(0.01),name='fc3')(x)
+    x = Dense(2048,activity_regularizer=activity_l1(0.01),name='fc3')(x)
     x = BatchNormalization(name='fc3_bn')(x)
     x = Activation('relu',name='fc3_relu')(x)
 
-    x = Dense(2048,W_regularizer=l1(0.01),name='fc4')(x)
+    x = Dense(2048,activity_regularizer=activity_l1(0.01),name='fc4')(x)
     x = BatchNormalization(name='fc4_bn')(x)
     x = Activation('relu',name='fc4_relu')(x)
 
@@ -242,30 +242,35 @@ def residual_bn_rg(loadweights,weightfile,stop_summary):
     vggmodel = vgg16.VGG16(include_top=False)
     # create fully connected layer
     fc_input = Input(shape=(512,5,10))
+
+    # Reshape layer
     x1 = Flatten(name='flatten')(fc_input)
+    x1 = Dense(2048,W_regularizer=l1(0.01),name='fc1')(x1)
+    x1 = BatchNormalization(name='fc1_bn')(x1)
+    x1 = Activation('relu',name='fc1_relu')(x1)
     
-    x2 = Dense(2048,W_regularizer=l1(0.01),name='fc1')(x1)
-    x2 = BatchNormalization(name='fc1_bn')(x2)
-    x2 = Activation('relu',name='fc1_relu')(x2)
+    # Residual Block
+    x2 = Dense(2048,W_regularizer=l1(0.01),name='fc2')(x1)
+    x2 = BatchNormalization(name='fc2_bn')(x2)
+    x2 = Activation('relu',name='fc2_relu')(x2)
 
+    # Sum input with residual
     x3 = merge([x1,x2],mode = 'sum',name='res_1')
-    
-    x4 = Dense(2048,W_regularizer=l1(0.01),name='fc2')(x3)
-    x4 = BatchNormalization(name='fc2_bn')(x4)
-    x4 = Activation('relu',name='fc2_relu')(x4)
 
-    x5 = merge([x3,x4],mode = 'sum',name='res_2')
+    # Residual block
+    x4 = Dense(2048,W_regularizer=l1(0.01),name='fc3')(x3)
+    x4 = BatchNormalization(name='fc3_bn')(x4)
+    x4 = Activation('relu',name='fc3_relu')(x4)
 
-    x6 = Dense(2048,W_regularizer=l1(0.01),name='fc3')(x5)
-    x6 = BatchNormalization(name='fc3_bn')(x6)
-    x6 = Activation('relu',name='fc3_relu')(x6)
+    # Residual block
+    x5 = Dense(2048,W_regularizer=l1(0.01),name='fc4')(x4)
+    x5 = BatchNormalization(name='fc4_bn')(x5)
+    x5 = Activation('relu',name='fc4_relu')(x5)
 
-    x7 = merge([x5,x6],mode = 'sum',name='res_3')
+    # Sum input with residual
+    x = merge([x3,x5],mode = 'sum',name='res_2')
 
-    x = Dense(2048,W_regularizer=l1(0.01),name='fc4')(x7)
-    x = BatchNormalization(name='fc4_bn')(x)
-    x = Activation('relu',name='fc4_relu')(x)
-
+    # Reshape layer
     x = Dense(60,activation='linear',name='predictions')(x)
     fcmodel = Model(fc_input,x)
 
