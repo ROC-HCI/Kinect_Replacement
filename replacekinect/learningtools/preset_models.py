@@ -41,8 +41,8 @@ def doubledense(loadweights,weightfile,stop_summary):
     x = Flatten(name='flatten')(fc_input)
     x = Dense(2048, activation='relu',name='fc1')(x)
     x = Dense(2048, activation='relu',name='fc2')(x)
-    x = Dense(2048, activation='relu',name='fc1')(x)
-    x = Dense(2048, activation='relu',name='fc2')(x)
+    x = Dense(2048, activation='relu',name='fc3')(x)
+    x = Dense(2048, activation='relu',name='fc4')(x)
     x = Dense(60,activation='linear',name='predictions')(x)
     fcmodel = Model(fc_input,x)
     # Load the model weights if instructed
