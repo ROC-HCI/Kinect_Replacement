@@ -204,11 +204,11 @@ def lesscnn_dd_bn_rg (loadweights,weightfile,vggweightfile,\
     # Creating the fully connected layers
     x = Flatten(name='flatten')(fc_input)
     
-    x = Dense(2048,activity_regularizer=activity_l1(0.01),name='fc1')(x)
-    x = BatchNormalization(name='fc1_bn')(x)
-    x = Activation('relu',name='fc1_relu')(x)
+    #x = Dense(2048,name='fc1')(x)
+    #x = BatchNormalization(name='fc1_bn')(x)
+    #x = Activation('relu',name='fc1_relu')(x)
     
-    x = Dense(2048,activity_regularizer=activity_l1(0.01),name='fc2')(x)
+    x = Dense(1024,activity_regularizer=activity_l1(0.01),name='fc2')(x)
     x = BatchNormalization(name='fc2_bn')(x)
     x = Activation('relu',name='fc2_relu')(x)
 
