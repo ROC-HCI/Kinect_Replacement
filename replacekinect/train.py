@@ -8,8 +8,9 @@ from skeletonutils import data_stream_shuffle
 # Argument parser
 parser = argparse.ArgumentParser('Module for training neural network to replace kinect')
 parser.add_argument('datafile',help='Full path of the data (h5) file')
-parser.add_argument('-m',dest='modelid',type=int,default=1,\
-    help='ID of the preset model to be loaded. ID = 1 is the original preset model \
+parser.add_argument('-m',dest='modelid',type=int,choices=range(1,10),default=1,\
+    help='ID of the preset model to be loaded. choices=%(choices)s. \
+    ID = 1 is the original preset model \
     with 5 blocks of CNN from VGG16, two FC layers with 1024 relu neurons, and one FC \
     layer with 60 linear neurons. ID = 2 is similar, except 4 blocks of CNN from vgg. \
     ID = 3 has 3 blocks of CNN. ID = 4 has a block of tunable CNN. In ID = 5, number \
@@ -81,11 +82,13 @@ else:
 # Create batch and feed the fully connected neural network
 count = 0
 # Test data generator (Never ending)
-test_stream = it.cycle(data_stream_shuffle(args.datafile,testset,batchsize=args.batch_size))
+test_stream = it.cycle(data_stream_shuffle(args.datafile,testset,\
+    batchsize=args.batch_size))
 print 'Starting Training ... '
 for iter_ in range(args.nb_iter):
     # Flow data from the training data stream
-    for frames, joints in data_stream_shuffle(args.datafile,trainset,batchsize=args.batch_size):
+    for frames, joints in data_stream_shuffle(args.datafile,trainset,\
+        batchsize=args.batch_size):
         newinput = cnnmodel.predict(frames) # pass through CNN layers
         tr_loss = model.train_on_batch(newinput,joints) # train on batch
         # get next test data

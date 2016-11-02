@@ -1,11 +1,5 @@
-data/
 results/
-others/
-shells/
-test_imgs/
-foo_joints.csv
-log.txt
-predict_joints.csv
-test_joints.csv
+replacekinect/run_gpu_test.sh
+replacekinect/run_gpu_train.sh
 *.h5
 *.pyc
