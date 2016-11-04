@@ -33,8 +33,9 @@ def main():
     parser.add_argument('--out_prefix',dest='out_prefix',default='',\
         help='A prefix for the output weight file (default: <Empty String>')
     parser.add_argument('--prefit',dest='prefit',action='store_true',default=False,\
-        help='Prefix the output weight filename with the number of iterations so that \
-        they are not overwritten in different iterations (default: %(default)s)')
+        help='Add iteration as a prefix to the output weight filename so that \
+        the weight files do not overwrite themselves (default: %(default)s)')
+
     args = parser.parse_args()
 
     # Training test split
