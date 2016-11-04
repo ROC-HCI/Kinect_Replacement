@@ -23,3 +23,6 @@ python train.py '/scratch/mtanveer/automanner_dataset.h5' -m 3
 
 # Test Options
 ##############
+# Check loss functions
+python visualize.py loss --losspath /Users/itanveer/Devel/Kinect_Replacement/Results/result_3d
+# check sample predictions
