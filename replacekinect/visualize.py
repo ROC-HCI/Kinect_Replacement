@@ -61,8 +61,8 @@ def vizsample(data_gen,cnnmodel,model):
         inp = raw_input('Press Enter to continue (or "quit" to exit) ...') 
         if inp == 'quit':
             break
-# Draw Accuracy vs. MSE plot
-def vizmse(data_gen,out_prefix,cnnmodel,model):
+# Calculates all the necessary to plot an Accuracy vs. MSE plot
+def save_acc_mse(data_gen,out_prefix,cnnmodel,model):
     # Locally importing in order to reduce loading time for others
     mse=[]
     batch_count = 0
@@ -73,19 +73,39 @@ def vizmse(data_gen,out_prefix,cnnmodel,model):
         mse.extend(np.mean((joints-outjoints)**2.,axis=1).tolist())
         print 'Batch:',batch_count
         batch_count+=1
+    # Save the histogram for total mse
     acc,mse = np.histogram(mse,1000)
-    acc = np.cumsum(acc)
+    acc = np.cumsum(acc/float(np.max(acc)))
     if len(acc)!=len(mse):
         mse = mse[1:]
-    # Save the histogram
     with h5py.File(out_prefix+'hist.h5','w') as f:
         f['/accuracy'] = acc
         f['/mse_bins'] = mse
 
+# Draw Accuracy vs. MSE plot
+def show_acc_mse(folderpath):
+    allfiles = [item for item in os.listdir(folderpath) if item.endswith('h5')]
+    print 'Looking into folder:',folderpath
+    if not allfiles:
+        print 'folder empty:',folderpath
+        return
+    # Plot the accuracy vs mse graph
+    colors = iter(plt.cm.Set1(np.linspace(0,1,len(allfiles))))
+    plt.figure()
+    for afile in allfiles:
+        file_ = os.path.join(folderpath,afile)
+        with h5py.File(file_) as f:
+            c = next(colors)
+            plt.plot(f['/mse_bins'][:],f['/accuracy'][:],c=c,linewidth=1.5,label=afile)
+    plt.xlabel('Mean Squared Error')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.show()
+
 def main():
     # Argument parser
     parser = argparse.ArgumentParser('Module for testing neural network to replace kinect')
-    parser.add_argument('command',choices=['loss','mse_acc','sample'],\
+    parser.add_argument('command',choices=['loss','mse_acc_save','mse_acc_show','sample'],\
         help='Commands specifying what to do (%(choices)s)')
     parser.add_argument('--data',dest='datafile',help='Full path of the data (h5) file')
     parser.add_argument('--weight',dest='weightfile',\
@@ -93,14 +113,16 @@ def main():
         which preset model will be loaded.')
     parser.add_argument('--losspath',dest='losspath',\
         help='Path to the folder where loss files ("kr_pre*") are located')
+    parser.add_argument('--histpath',dest='histpath',default='../Results/result_hist/',\
+        help='Path to the folder where the *hist.h5 are located')
     parser.add_argument('--vggweightfile',dest='vggweightfile',default='vgg16_weights.h5',\
         help='Weight filename (default: %(default)s)')
     parser.add_argument('--prefout',dest='prefout',default='',\
-        help='Prefix of output files for mse_acc command')
+        help='Prefix of output files for mse_acc_save command')
     args = parser.parse_args()
 
     # Perform action based on the command
-    if args.command == 'sample' or args.command == 'mse_acc':
+    if args.command == 'sample' or args.command == 'mse_acc_save':
         if not args.datafile or not args.weightfile or not args.vggweightfile:
             print 'The following arguments are necessary to sample or plot error:'
             print 'Full path of the data file (--data)'
@@ -126,14 +148,20 @@ def main():
         # Choose the correct action
         if args.command=='sample':
             vizsample(data_gen,cnnmodel,model)
-        elif args.command=='mse_acc':
-            vizmse(data_gen,args.prefout,cnnmodel,model)
+        elif args.command=='mse_acc_save':
+            save_acc_mse(data_gen,args.prefout,cnnmodel,model)
     elif args.command == 'loss':
         if not args.losspath:
-            print 'The following arguments are necesary for plotting loss function:'
+            print 'The following argument is necesary for plotting loss function:'
             print 'Path to the folder where loss files ("kr_pre*") are located (--losspath)'
             return
         vizloss(args.losspath)
+    elif args.command == 'mse_acc_show':
+        if not args.histpath:
+            print 'The following argument is necesary for plotting loss function:'
+            print 'Path to the folder where the *hist.h5 are located (--histpath)'
+            return
+        show_acc_mse(args.histpath)
     else:
         print 'Command not recognized'
         
