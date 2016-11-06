@@ -64,7 +64,6 @@ def vizsample(data_gen,cnnmodel,model):
 # Draw Accuracy vs. MSE plot
 def vizmse(data_gen,out_prefix,cnnmodel,model):
     # Locally importing in order to reduce loading time for others
-    from skeletonutils import skelviz_mayavi as sviz
     mse=[]
     batch_count = 0
     for frames,joints in data_gen:
