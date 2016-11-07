@@ -145,11 +145,12 @@ def main():
         m = file.index('_')
         modelid = int(file[3:m])
         cnnmodel,model=parse_modelid(modelid,True,args.weightfile,False,args.vggweightfile)
-        data_gen = data_stream_shuffle(args.datafile,testset)
         # Choose the correct action
         if args.command=='sample':
+            data_gen = data_stream_shuffle(args.datafile,testset)
             vizsample(data_gen,cnnmodel,model)
         elif args.command=='mse_acc_save':
+            data_gen = data_stream_shuffle(args.datafile,testset,batchsize=1024)
             save_acc_mse(data_gen,args.prefout,cnnmodel,model)
     elif args.command == 'loss':
         if not args.losspath:
