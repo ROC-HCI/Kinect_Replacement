@@ -76,7 +76,7 @@ def save_acc_mse(data_gen,out_prefix,cnnmodel,model):
     # Save the histogram for total mse
     acc,mse = np.histogram(mse,1000)
     acc = np.cumsum(acc)
-    acc = acc/np.max(acc)
+    acc = acc/float(np.max(acc))
     if len(acc)!=len(mse):
         mse = mse[1:]
     with h5py.File(out_prefix+'hist.h5','w') as f:
