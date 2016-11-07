@@ -27,5 +27,7 @@ python train.py '/scratch/mtanveer/automanner_dataset.h5' -m 3
 python visualize.py loss --losspath /Users/itanveer/Devel/Kinect_Replacement/Results/result_3d
 # check sample predictions
 python visualize.py sample --data /Users/itanveer/Data/ROCSpeak_BL/allData_h5/automanner_dataset.h5 --weight /Users/itanveer/Devel/Kinect_Replacement/Results/result_3d/pre4_weightfile.h5
-# Create MSE_ACC plot
-python visualize.py mse_acc --data /Users/itanveer/Data/ROCSpeak_BL/allData_h5/automanner_dataset.h5 --weight /Users/itanveer/Devel/Kinect_Replacement/Results/result_3d/pre4_weightfile.h5 
+# Perform necessary calculations for MSE_ACC plot
+python visualize.py mse_acc_save --data /scratch/mtanveer/automanner_dataset.h5 --weight pre2_weightfile.h5 --prefout 'pre2_'
+# Show the MSE_ACC plot (if the outputs of mse_acc_save command is saved to ../Results/result_hist/)
+python visualize.py mse_acc_show --histpath ../Results/result_hist/
