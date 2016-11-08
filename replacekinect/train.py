@@ -50,7 +50,7 @@ def main():
     count = 0
     # Test data generator (Never ending)
     test_stream = it.cycle(data_stream_shuffle(args.datafile,testset,\
-        batchsize=args.batch_size))
+        batchsize=1))
     print 'Starting Training ... '
     for iter_ in range(args.nb_iter):
         # Flow data from the training data stream
@@ -116,6 +116,9 @@ def parse_modelid(modelid,load_weights,weightfile,stop_summary,\
         from learningtools.preset_models import residual_bn_rg
         cnnmodel,model=residual_bn_rg(load_weights,weightfile,\
             stop_summary)
+    elif modelid == 0:
+        # Custom model
+        raise NotImplementedError()
     else:
         raise ValueError('Model ID not recognized')
     return cnnmodel,model

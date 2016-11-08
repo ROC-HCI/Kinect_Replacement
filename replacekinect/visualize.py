@@ -97,7 +97,8 @@ def show_acc_mse(folderpath):
         file_ = os.path.join(folderpath,afile)
         with h5py.File(file_) as f:
             c = next(colors)
-            plt.plot(f['/mse_bins'][:],f['/accuracy'][:],c=c,linewidth=1.5,label=afile)
+            modelid = int(afile[3:4])-1
+            plt.plot(f['/mse_bins'][:],f['/accuracy'][:],c=c,linewidth=1.5,label=plotnames[modelid])
     plt.xlabel('Mean Squared Error')
     plt.ylabel('Accuracy')
     plt.legend()
