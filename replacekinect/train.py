@@ -65,7 +65,7 @@ def main():
             tst_loss = model.test_on_batch(tst_frame,tst_joints)
             # print status
             count+=len(frames)
-            print '# of Data fed:',count, 'Mean Train Loss:',np.mean(tr_loss),\
+            print '# of Data fed:',count,'Mean Train Loss:',np.mean(tr_loss),\
                 'Test Loss:',tst_loss[0]
             sys.stdout.flush()
         print 'iteration:',iter_, 'saving weights ...',

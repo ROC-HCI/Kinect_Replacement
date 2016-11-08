@@ -84,7 +84,7 @@ def save_acc_mse(data_gen,out_prefix,cnnmodel,model):
         f['/mse_bins'] = mse
 
 # Draw Accuracy vs. MSE plot
-def show_acc_mse(folderpath):
+def show_acc_mse(folderpath,logmse=False):
     allfiles = [item for item in os.listdir(folderpath) if item.endswith('h5')]
     print 'Looking into folder:',folderpath
     if not allfiles:
@@ -98,8 +98,15 @@ def show_acc_mse(folderpath):
         with h5py.File(file_) as f:
             c = next(colors)
             modelid = int(afile[3:4])-1
-            plt.plot(f['/mse_bins'][:],f['/accuracy'][:],c=c,linewidth=1.5,label=plotnames[modelid])
-    plt.xlabel('Mean Squared Error')
+            if logmse:
+                mse = np.log(f['/mse_bins'][:])
+            else:
+                mse = f['/mse_bins'][:]
+            plt.plot(mse,f['/accuracy'][:],c=c,linewidth=1.5,label=plotnames[modelid])
+    if logmse:
+        plt.xlabel('Log of Mean Squared Error')
+    else:
+        plt.xlabel('Log of Mean Squared Error')
     plt.ylabel('Accuracy')
     plt.legend()
     plt.show()
@@ -107,7 +114,7 @@ def show_acc_mse(folderpath):
 def main():
     # Argument parser
     parser = argparse.ArgumentParser('Module for testing neural network to replace kinect')
-    parser.add_argument('command',choices=['loss','mse_acc_save','mse_acc_show','sample'],\
+    parser.add_argument('command',choices=['loss','acc_mse_save','acc_mse_show','sample'],\
         help='Commands specifying what to do (%(choices)s)')
     parser.add_argument('--data',dest='datafile',help='Full path of the data (h5) file')
     parser.add_argument('--weight',dest='weightfile',\
@@ -120,11 +127,13 @@ def main():
     parser.add_argument('--vggweightfile',dest='vggweightfile',default='vgg16_weights.h5',\
         help='Weight filename (default: %(default)s)')
     parser.add_argument('--prefout',dest='prefout',default='',\
-        help='Prefix of output files for mse_acc_save command')
+        help='Prefix of output files for acc_mse_save command')
+    parser.add_argument('--log_mse',dest='logmse',action='store_true',default=False,\
+        help='Use the logarithm of mean-squared-error as the x axis of acc-mse plot')
     args = parser.parse_args()
 
     # Perform action based on the command
-    if args.command == 'sample' or args.command == 'mse_acc_save':
+    if args.command == 'sample' or args.command == 'acc_mse_save':
         if not args.datafile or not args.weightfile or not args.vggweightfile:
             print 'The following arguments are necessary to sample or plot error:'
             print 'Full path of the data file (--data)'
@@ -150,7 +159,7 @@ def main():
         if args.command=='sample':
             data_gen = data_stream_shuffle(args.datafile,testset)
             vizsample(data_gen,cnnmodel,model)
-        elif args.command=='mse_acc_save':
+        elif args.command=='acc_mse_save':
             data_gen = data_stream_shuffle(args.datafile,testset,batchsize=1024)
             save_acc_mse(data_gen,args.prefout,cnnmodel,model)
     elif args.command == 'loss':
@@ -159,12 +168,12 @@ def main():
             print 'Path to the folder where loss files ("kr_pre*") are located (--losspath)'
             return
         vizloss(args.losspath)
-    elif args.command == 'mse_acc_show':
+    elif args.command == 'acc_mse_show':
         if not args.histpath:
             print 'The following argument is necesary for plotting loss function:'
             print 'Path to the folder where the *hist.h5 are located (--histpath)'
             return
-        show_acc_mse(args.histpath)
+        show_acc_mse(args.histpath,args.logmse)
     else:
         print 'Command not recognized'
         
