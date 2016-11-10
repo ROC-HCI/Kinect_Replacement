@@ -150,7 +150,7 @@ def main():
         path,file = os.path.split(args.weightfile)
         if not file.startswith('pre') or not file.endswith('weightfile.h5') or \
             not int(file[3:4]) in range(1,10) or not '_' in file:
-            print 'Weightfile name is not recognized'
+            print 'Weightfile name is not recognized (gotta start with pre and end with weightfile.h5)'
             return
         m = file.index('_')
         modelid = int(file[3:m])
