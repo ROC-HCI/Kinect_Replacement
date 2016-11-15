@@ -49,8 +49,7 @@ def main():
     # Create batch and feed the fully connected neural network
     count = 0
     # Test data generator (Never ending)
-    test_stream = it.cycle(data_stream_shuffle(args.datafile,testset,\
-        batchsize=1))
+    test_stream = it.cycle(data_stream_shuffle(args.datafile,testset,batchsize=1))
     print 'Starting Training ... '
     for iter_ in range(args.nb_iter):
         # Flow data from the training data stream
@@ -125,3 +124,5 @@ def parse_modelid(modelid,load_weights,weightfile,stop_summary,\
 
 if __name__=='__main__':
     main()
+
+    

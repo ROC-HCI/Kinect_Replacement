@@ -2,9 +2,12 @@ import h5py
 import os
 import numpy as np
 import itertools as it
+from keras.applications.imagenet_utils import preprocess_input
 
 # Data stream generator with better randomization
-def data_stream_shuffle(datafile,datrng,batchsize=128):
+# If preprocess is True, the frame is mean-centered and converted to BGR
+# This is necessary for working with VGG model
+def data_stream_shuffle(datafile,datrng,batchsize=128,preprocess=True):
     # Input check and flatten until the lowest layer
     if not os.path.isfile(datafile):
         raise IOError('File not found')
@@ -34,5 +37,8 @@ def data_stream_shuffle(datafile,datrng,batchsize=128):
             else:
                 del rem[aparent]
             if len(batch_v)==batchsize or (not rem and len(batch_v)>0):
-                yield np.array(batch_v), np.array(batch_j)
+                # Preprocess the frames
+                if preprocess:
+                    frames = preprocess_input(np.array(batch_v,dtype='float64'))
+                yield frames, np.array(batch_j,dtype='float64')
                 batch_v,batch_j = [],[]

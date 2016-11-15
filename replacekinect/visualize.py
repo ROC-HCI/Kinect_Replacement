@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from train import parse_modelid
 from skeletonutils import data_stream_shuffle
 
-plotnames = ['original','cnnblk4','cnnblk3','tunable',\
-'dd','dd_bn','dd_bn_rg','cnnblk3_dd_bn_rg','res_bn_rg']
+plotnames = ['original','cnnblk4','cnnblk3','tunable','dd','dd_bn','dd_bn_rg',\
+'cnnblk3_dd_bn_rg','res_bn_rg']
 
 def vizloss(folderpath):
     files = os.listdir(folderpath)
@@ -39,6 +39,7 @@ def vizloss(folderpath):
     plt.title('Test Loss')
     plt.legend()
     plt.show()
+
 # Visualize some sample prediction data
 def vizsample(data_gen,cnnmodel,model):
     # Locally importing in order to reduce loading time for others
@@ -61,6 +62,7 @@ def vizsample(data_gen,cnnmodel,model):
         inp = raw_input('Press Enter to continue (or "quit" to exit) ...') 
         if inp == 'quit':
             break
+
 # Calculates all the necessary to plot an Accuracy vs. MSE plot
 def save_acc_mse(data_gen,out_prefix,cnnmodel,model):
     # Locally importing in order to reduce loading time for others
@@ -103,7 +105,7 @@ def show_acc_mse(folderpath,logmse=False):
             else:
                 mse = f['/mse_bins'][:]
             plt.plot(mse,f['/accuracy'][:],c=c,linewidth=1.5,\
-                label=plotnames[modelid]+'('+str(modelid)+')')
+                label=plotnames[modelid]+'('+str(modelid+1)+')')
     if logmse:
         plt.xlabel('Log of Mean Squared Error')
     else:
