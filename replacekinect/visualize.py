@@ -114,27 +114,7 @@ def show_acc_mse(folderpath,logmse=False):
     plt.legend()
     plt.show()
 
-def main():
-    # Argument parser
-    parser = argparse.ArgumentParser('Module for testing neural network to replace kinect')
-    parser.add_argument('command',choices=['loss','acc_mse_save','acc_mse_show','sample'],\
-        help='Commands specifying what to do (%(choices)s)')
-    parser.add_argument('--data',dest='datafile',help='Full path of the data (h5) file')
-    parser.add_argument('--weight',dest='weightfile',\
-        help='Trained weight filename for the preset model. The filename will determine \
-        which preset model will be loaded.')
-    parser.add_argument('--losspath',dest='losspath',\
-        help='Path to the folder where loss files ("kr_pre*") are located')
-    parser.add_argument('--histpath',dest='histpath',default='../Results/result_hist/',\
-        help='Path to the folder where the *hist.h5 are located')
-    parser.add_argument('--vggweightfile',dest='vggweightfile',default='vgg16_weights.h5',\
-        help='Weight filename (default: %(default)s)')
-    parser.add_argument('--prefout',dest='prefout',default='',\
-        help='Prefix of output files for acc_mse_save command')
-    parser.add_argument('--log_mse',dest='logmse',action='store_true',default=False,\
-        help='Use the logarithm of mean-squared-error as the x axis of acc-mse plot')
-    args = parser.parse_args()
-
+def main(args):
     # Perform action based on the command
     if args.command == 'sample' or args.command == 'acc_mse_save':
         if not args.datafile or not args.weightfile or not args.vggweightfile:
@@ -150,15 +130,19 @@ def main():
             testset = f.attrs['test_range'].tolist()
 
         # Select correct preset model from the weightfile naming convention
-        path,file = os.path.split(args.weightfile)
-        if not file.startswith('pre') or not file.endswith('weightfile.h5') or \
-            not int(file[3:4]) in range(1,10) or not '_' in file:
-            print 'Weightfile name is not recognized (gotta start with pre and end with \
-            weightfile.h5)'
-            return
-        m = file.index('_')
-        modelid = int(file[3:m])
-        cnnmodel,model=parse_modelid(modelid,True,args.weightfile,False,args.vggweightfile)
+        if not args.custom:
+            path,file = os.path.split(args.weightfile)
+            if not file.startswith('pre') or not file.endswith('weightfile.h5') or \
+                not int(file[3:4]) in range(0,10) or not '_' in file:
+                print 'Weightfile name is not recognized (gotta start with pre and end with \
+                weightfile.h5)'
+                return
+            m = file.index('_')
+            modelid = int(file[3:m])
+            cnnmodel,model=parse_modelid(modelid,True,args.weightfile,\
+                False,args.vggweightfile)
+        else:
+            cnnmodel,model=parse_modelid(0,True,'',False,'',modelname=args.weightfile)
         # Choose the correct action
         if args.command=='sample':
             data_gen = data_stream_shuffle(args.datafile,testset)
@@ -181,8 +165,31 @@ def main():
     else:
         print 'Command not recognized'
         
-
 if __name__=='__main__':
-    main()
+    # Argument parser
+    parser = argparse.ArgumentParser('Module for testing neural network to replace kinect')
+    parser.add_argument('command',choices=['loss','acc_mse_save','acc_mse_show','sample'],\
+        help='Commands specifying what to do (%(choices)s)')
+    parser.add_argument('--data',dest='datafile',help='Full path of the data (h5) file')
+    parser.add_argument('--weight',dest='weightfile',\
+        help='Trained weight filename for the preset model. The filename will determine \
+        which preset model will be loaded.')
+    parser.add_argument('--losspath',dest='losspath',\
+        help='Path to the folder where loss files ("kr_pre*") are located')
+    parser.add_argument('--histpath',dest='histpath',default='../Results/result_hist/',\
+        help='Path to the folder where the *hist.h5 are located')
+    parser.add_argument('--vggweightfile',dest='vggweightfile',default='vgg16_weights.h5',\
+        help='Weight filename (default: %(default)s)')
+    parser.add_argument('--prefout',dest='prefout',default='',\
+        help='Prefix of output files for acc_mse_save command')
+    parser.add_argument('--log_mse',dest='logmse',action='store_true',default=False,\
+        help='Use the logarithm of mean-squared-error as the x axis of acc-mse plot')
+    parser.add_argument('--custom_model',dest='custom',action='store_true',default=False,\
+        help='This flag indicates a custom model file was used instead of preset models. \
+        Therefore, the --weight parameter expects a "prefix for custom model" rather than \
+        the weightfiles itself. The prefix follows by _cnn.h5 for cnn model and _fc.h5 for \
+        fully connected model.')
+    args = parser.parse_args()    
+    main(args)
 
 

@@ -17,6 +17,11 @@ python train.py '/scratch/mtanveer/automanner_dataset.h5' -m 2 --out_prefix pres
 python train.py '/scratch/mtanveer/automanner_dataset.h5' -m 2 --load_weights --weightfile preset2_weightfile.h5
 # Train the third preset model that has 3 CNN blocks
 python train.py '/scratch/mtanveer/automanner_dataset.h5' -m 3
+# Train using custom model files. The prefix of custom model files are
+# given using --custom_model_prefix switch. The prefix is followed by '_cnn.h5' for cnn
+# and '_fc.h5' for fully connected part of the netweork. The weights and architecture
+# both are saved in the h5 file using model.save command.
+python train.py /scratch/mtanveer/automanner_dataset.h5 -m 0 --custom_model_prefix cnn4_tunable_dd_bn
 
 # Data file in my local folder structure
 # python train.py /Users/itanveer/Data/ROCSpeak_BL/allData_h5/automanner_dataset.h5 --load_weights
