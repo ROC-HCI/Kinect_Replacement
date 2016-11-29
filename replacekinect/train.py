@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import argparse
 import itertools as it
-from skeletonutils import data_stream_shuffle
+from skeletonutils import data_stream_quaternion_shuffle
 
 def main(args):
     # Training test split
@@ -17,12 +17,12 @@ def main(args):
     # Create batch and feed the fully connected neural network
     count = 0
     # Test data generator (Never ending)
-    test_stream = it.cycle(data_stream_shuffle(args.datafile,testset,batchsize=1))
+    test_stream = it.cycle(data_stream_quaternion_shuffle(args.datafile,testset,batchsize=1))
     print 'Starting Training ... '
     for iter_ in range(args.nb_iter):
         # Flow data from the training data stream
 
-        for frames, joints in data_stream_shuffle(args.datafile,trainset,\
+        for frames, joints in data_stream_quaternion_shuffle(args.datafile,trainset,\
             batchsize=args.batch_size):
             newinput = cnnmodel.predict(frames) # pass through CNN layers
             tr_loss = model.train_on_batch(newinput,joints) # train on batch
@@ -51,43 +51,43 @@ def main(args):
     print 'Training Finished'
 
 def parse_modelid(modelid,load_weights,weightfile,stop_summary,\
-    vggweightfile,modelname='custom_model'):
+    vggweightfile,modelname='custom_model',outnode=76):
         # Parse Modelid
     if modelid==1:
         from learningtools.preset_models import original
-        cnnmodel,model=original(load_weights,weightfile,stop_summary)
+        cnnmodel,model=original(load_weights,weightfile,stop_summary,outnode)
     elif modelid==2:
         from learningtools.preset_models import lesscnn
         cnnmodel,model=lesscnn(load_weights,weightfile,vggweightfile,\
-            stop_summary,4)
+            stop_summary,4,outnode)
     elif modelid==3:
         from learningtools.preset_models import lesscnn
         cnnmodel,model=lesscnn(load_weights,weightfile,vggweightfile,\
-            stop_summary,3)
+            stop_summary,3,outnode)
     elif modelid==4:
         from learningtools.preset_models import tunable
         cnnmodel,model=tunable(load_weights,weightfile,vggweightfile,\
-            stop_summary)
+            stop_summary,outnode)
     elif modelid==5:
         from learningtools.preset_models import doubledense
         cnnmodel,model=doubledense(load_weights,weightfile,\
-            stop_summary)
+            stop_summary,outnode)
     elif modelid==6:
         from learningtools.preset_models import doubledense_bn
         cnnmodel,model=doubledense_bn(load_weights,weightfile,\
-            stop_summary)
+            stop_summary,outnode)
     elif modelid == 7:
         from learningtools.preset_models import doubledense_bn_rg
         cnnmodel,model=doubledense_bn_rg(load_weights,weightfile,\
-            stop_summary)
+            stop_summary,outnode)
     elif modelid == 8:
         from learningtools.preset_models import lesscnn_dd_bn_rg
         cnnmodel,model=lesscnn_dd_bn_rg(load_weights,weightfile,\
-            vggweightfile,stop_summary,3)
+            vggweightfile,stop_summary,3,outnode)
     elif modelid == 9:
         from learningtools.preset_models import residual_bn_rg
         cnnmodel,model=residual_bn_rg(load_weights,weightfile,\
-            stop_summary)
+            stop_summary,outnode)
     elif modelid == 0:
         # Custom model
         from keras.models import load_model

@@ -9,7 +9,7 @@ import h5py
 
 # This is the original preset model configuration for 
 # replacekinect project
-def original(loadweights,weightfile,stop_summary):
+def original(loadweights,weightfile,stop_summary,outnode):
     # Vgg model without fully connected layer
     vggmodel = vgg16.VGG16(include_top=False)
     # create fully connected layer
@@ -17,7 +17,7 @@ def original(loadweights,weightfile,stop_summary):
     x = Flatten(name='flatten')(fc_input)
     x = Dense(1024, activation='relu',name='fc1')(x)
     x = Dense(1024, activation='relu',name='fc2')(x)
-    x = Dense(60,activation='linear',name='predictions')(x)
+    x = Dense(outnode,activation='linear',name='predictions')(x)
     fcmodel = Model(fc_input,x)
     # Load the model weights if instructed
     if loadweights:
@@ -35,7 +35,7 @@ def original(loadweights,weightfile,stop_summary):
 
 # The number of fully connected layer is doubled, as well as
 # the number of neurons per layer
-def doubledense(loadweights,weightfile,stop_summary):
+def doubledense(loadweights,weightfile,stop_summary,outnode):
     # Vgg model without fully connected layer
     vggmodel = vgg16.VGG16(include_top=False)
     # create fully connected layer
@@ -45,7 +45,7 @@ def doubledense(loadweights,weightfile,stop_summary):
     x = Dense(2048, activation='relu',name='fc2')(x)
     x = Dense(2048, activation='relu',name='fc3')(x)
     x = Dense(2048, activation='relu',name='fc4')(x)
-    x = Dense(60,activation='linear',name='predictions')(x)
+    x = Dense(outnode,activation='linear',name='predictions')(x)
     fcmodel = Model(fc_input,x)
     # Load the model weights if instructed
     if loadweights:
@@ -62,7 +62,7 @@ def doubledense(loadweights,weightfile,stop_summary):
     return vggmodel, fcmodel
 
 # Double dense with batch normalization
-def doubledense_bn(loadweights,weightfile,stop_summary):
+def doubledense_bn(loadweights,weightfile,stop_summary,outnode):
     # Vgg model without fully connected layer
     vggmodel = vgg16.VGG16(include_top=False)
     # create fully connected layer
@@ -85,7 +85,7 @@ def doubledense_bn(loadweights,weightfile,stop_summary):
     x = BatchNormalization(name='fc4_bn')(x)
     x = Activation('relu',name='fc4_relu')(x)
 
-    x = Dense(60,activation='linear',name='predictions')(x)
+    x = Dense(outnode,activation='linear',name='predictions')(x)
     fcmodel = Model(fc_input,x)
 
     # Load the model weights if instructed
@@ -104,7 +104,7 @@ def doubledense_bn(loadweights,weightfile,stop_summary):
     return vggmodel, fcmodel
 
 # Double dense with batch normalization
-def doubledense_bn_rg(loadweights,weightfile,stop_summary):
+def doubledense_bn_rg(loadweights,weightfile,stop_summary,outnode):
     # Vgg model without fully connected layer
     vggmodel = vgg16.VGG16(include_top=False)
     # create fully connected layer
@@ -127,7 +127,7 @@ def doubledense_bn_rg(loadweights,weightfile,stop_summary):
     x = BatchNormalization(name='fc4_bn')(x)
     x = Activation('relu',name='fc4_relu')(x)
 
-    x = Dense(60,activation='linear',name='predictions')(x)
+    x = Dense(outnode,activation='linear',name='predictions')(x)
     fcmodel = Model(fc_input,x)
 
     # Load the model weights if instructed
@@ -148,7 +148,7 @@ def doubledense_bn_rg(loadweights,weightfile,stop_summary):
 
 # This is a preset model with four convolutional blocks
 def lesscnn (loadweights,weightfile,vggweightfile,\
-    stop_summary,nb_cnnblocks):
+    stop_summary,nb_cnnblocks,outnode):
     # Vgg model without fully connected layer
     vggmodel = custom_vgg16(nb_cnnblocks)
     vggmodel = load_pretrained_weights(vggweightfile,vggmodel)        
@@ -166,7 +166,7 @@ def lesscnn (loadweights,weightfile,vggweightfile,\
     x = Flatten(name='flatten_lesscnn')(fc_input)
     x = Dense(1024, activation='relu',name='fc1_lesscnn')(x)
     x = Dense(1024, activation='relu',name='fc2_lesscnn')(x)
-    x = Dense(60,activation='linear',name='predictions_lesscnn')(x)
+    x = Dense(outnode,activation='linear',name='predictions_lesscnn')(x)
     fcmodel = Model(fc_input,x)
     # Load the model weights if instructed
     if loadweights:
@@ -185,7 +185,7 @@ def lesscnn (loadweights,weightfile,vggweightfile,\
 # Preset model with cnn layers < 5, double dense, batch normalization
 # and regularization
 def lesscnn_dd_bn_rg (loadweights,weightfile,vggweightfile,\
-    stop_summary,nb_cnnblocks):
+    stop_summary,nb_cnnblocks,outnode):
     # Vgg model without fully connected layer
     vggmodel = custom_vgg16(nb_cnnblocks)
     vggmodel = load_pretrained_weights(vggweightfile,vggmodel)        
@@ -220,7 +220,7 @@ def lesscnn_dd_bn_rg (loadweights,weightfile,vggweightfile,\
     x = BatchNormalization(name='fc4_bn')(x)
     x = Activation('relu',name='fc4_relu')(x)
 
-    x = Dense(60,activation='linear',name='predictions')(x)
+    x = Dense(outnode,activation='linear',name='predictions')(x)
     fcmodel = Model(fc_input,x)
     # Load the model weights if instructed
     if loadweights:
@@ -237,7 +237,7 @@ def lesscnn_dd_bn_rg (loadweights,weightfile,vggweightfile,\
     return vggmodel, fcmodel
 
 # Double dense with batch normalization
-def residual_bn_rg(loadweights,weightfile,stop_summary):
+def residual_bn_rg(loadweights,weightfile,stop_summary,outnode):
     # Vgg model without fully connected layer
     vggmodel = vgg16.VGG16(include_top=False)
     # create fully connected layer
@@ -271,7 +271,7 @@ def residual_bn_rg(loadweights,weightfile,stop_summary):
     x = merge([x3,x5],mode = 'sum',name='res_2')
 
     # Reshape layer
-    x = Dense(60,activation='linear',name='predictions')(x)
+    x = Dense(outnode,activation='linear',name='predictions')(x)
     fcmodel = Model(fc_input,x)
 
     # Load the model weights if instructed
@@ -290,7 +290,7 @@ def residual_bn_rg(loadweights,weightfile,stop_summary):
     return vggmodel, fcmodel
 
 # With the four preset VGG16 block, one is kept tunable
-def tunable (loadweights,weightfile,vggweightfile,stop_summary):
+def tunable (loadweights,weightfile,vggweightfile,stop_summary,outnode):
     # Vgg model without fully connected layer
     vggmodel = custom_vgg16(4)
     vggmodel = load_pretrained_weights(vggweightfile,vggmodel)    
@@ -305,7 +305,7 @@ def tunable (loadweights,weightfile,vggweightfile,stop_summary):
     x = Flatten(name='flatten_fourcnn')(x)
     x = Dense(1024, activation='relu',name='fc1_fourcnn')(x)
     x = Dense(1024, activation='relu',name='fc2_fourcnn')(x)
-    x = Dense(60,activation='linear',name='predictions_fourcnn')(x)
+    x = Dense(outnode,activation='linear',name='predictions_fourcnn')(x)
     fcmodel = Model(fc_input,x)
     # Load the model weights if instructed
     if loadweights:
