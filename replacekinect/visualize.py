@@ -4,8 +4,9 @@ import math
 import numpy as np
 import argparse
 import matplotlib.pyplot as plt
+import quaternion as qt
 from train import parse_modelid
-from skeletonutils import data_stream_shuffle
+from skeletonutils import data_stream_quaternion_shuffle
 
 plotnames = ['original','cnnblk4','cnnblk3','tunable','dd','dd_bn','dd_bn_rg',\
 'cnnblk3_dd_bn_rg','res_bn_rg']
@@ -41,14 +42,20 @@ def vizloss(folderpath):
     plt.show()
 
 # Visualize some sample prediction data
-def vizsample(data_gen,cnnmodel,model):
+def vizsample(data_gen,cnnmodel,model,cvt_frm_quat=True):
     # Locally importing in order to reduce loading time for others
     from skeletonutils import skelviz_mayavi as sviz
+    skel = qt.read_arbit_skel()
+    edges = qt.readedges()
+    length = qt.bonelen(skel,edges)
     # Create batch over test dataset and compute loss
     for frames,joints in data_gen:
         # Get the prediction
         newinput = cnnmodel.predict(frames[:1,:,:,:])
         outjoints = model.predict(newinput)[0,:]
+        # Convert from quaternion to joint
+        if cvt_frm_quat:
+            outjoints = qt.q2joint(outjoints,length,edges)
         # Append time and frame number for skeleton plotter
         newoutput = np.insert(outjoints,0,[0,0])
         plt.imshow(np.transpose(frames[0,:,:,:],axes=[1,2,0]))
@@ -145,10 +152,10 @@ def main(args):
             cnnmodel,model=parse_modelid(0,True,'',False,'',modelname=args.weightfile)
         # Choose the correct action
         if args.command=='sample':
-            data_gen = data_stream_shuffle(args.datafile,testset)
+            data_gen = data_stream_quaternion_shuffle(args.datafile,testset)
             vizsample(data_gen,cnnmodel,model)
         elif args.command=='acc_mse_save':
-            data_gen = data_stream_shuffle(args.datafile,testset,batchsize=1024)
+            data_gen = data_stream_quaternion_shuffle(args.datafile,testset,batchsize=1024)
             save_acc_mse(data_gen,args.prefout,cnnmodel,model)
     elif args.command == 'loss':
         if not args.losspath:
