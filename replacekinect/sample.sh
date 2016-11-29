@@ -34,6 +34,8 @@ python visualize.py loss --losspath /Users/itanveer/Devel/Kinect_Replacement/Res
 python visualize.py sample --data /Users/itanveer/Data/ROCSpeak_BL/allData_h5/automanner_dataset.h5 --weight /Users/itanveer/Devel/Kinect_Replacement/Results/result_3d/pre4_weightfile.h5
 # Perform necessary calculations for ACC-MSE plot
 python visualize.py acc_mse_save --data /scratch/mtanveer/automanner_dataset.h5 --weight pre2_weightfile.h5 --prefout 'pre2_'
+# Compute ACC-MSE plot ingredients for a custom model
+python visualize.py acc_mse_save --data /scratch/mtanveer/automanner_dataset.h5 --custom_model --weight nn4_tunable_bn_quater
 # Show the ACC-MSE plot (if the outputs of mse_acc_save command is saved to ../Results/result_hist/)
 python visualize.py acc_mse_show --histpath ../Results/result_hist/
 # Show the ACC-MSE plot 

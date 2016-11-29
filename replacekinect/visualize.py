@@ -4,7 +4,7 @@ import math
 import numpy as np
 import argparse
 import matplotlib.pyplot as plt
-import quaternion as qt
+import skeletonutils.quaternion as qt
 from train import parse_modelid
 from skeletonutils import data_stream_quaternion_shuffle
 
