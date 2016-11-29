@@ -2,7 +2,13 @@ import h5py
 import os
 import numpy as np
 import itertools as it
+import quaternion as qt
 from keras.applications.imagenet_utils import preprocess_input
+
+# Requirements for data streamers
+# 1) Must be randomized
+# 2) Must send normalized video frames (i.e. preprocessed for vgg)
+
 
 # Data stream generator with better randomization
 # If preprocess is True, the frame is mean-centered and converted to BGR
@@ -39,6 +45,15 @@ def data_stream_shuffle(datafile,datrng,batchsize=128,preprocess=True):
             if len(batch_v)==batchsize or (not rem and len(batch_v)>0):
                 # Preprocess the frames
                 if preprocess:
-                    frames = preprocess_input(np.array(batch_v,dtype='float64'))
-                yield frames, np.array(batch_j,dtype='float64')
+                    frames = preprocess_input(np.array(batch_v,dtype='float32'))
+                else:
+                    frames = np.array(batch_v,dtype='float32')
+                yield frames, np.array(batch_j,dtype='float32')
                 batch_v,batch_j = [],[]
+
+def data_stream_quaternion_shuffle(datafile,datrng,batchsize=128,preprocess=True):
+    edges = qt.readedges()
+    for v,j in data_stream_shuffle(datafile,datrng,batchsize,preprocess):
+        q = qt.joint2q(j,edges)
+        yield v,q
+

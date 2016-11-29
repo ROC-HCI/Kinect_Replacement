@@ -55,7 +55,10 @@ import scipy.signal as sg
 ############################## Convenience ####################################
 
 # Read the Skeletal tree file
-def readskeletaltree(treefilename):
+def readskeletaltree(treefilename=None):
+    if not treefilename:
+        thisdir,thisfile = os.path.split(__file__)
+        treefilename = os.path.join(thisdir,'resources/KinectSkeleton.tree')
     assert os.path.isfile(treefilename)
     with open(treefilename) as f:
         assert f.readline().startswith('Nodes:')
